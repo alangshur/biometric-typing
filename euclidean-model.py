@@ -10,7 +10,7 @@ assert re.match(r'^s[0]*[0-9]*$', subject_id) != None
 assert re.match(r'^s[0]*[0-9]*$', subject_id_w) != None
 assert subject_id != subject_id_w
 
-def runHamiltonianModel(subject_id, subject_id_w):
+def runEuclideanModel(subject_id, subject_id_w):
 
     # collect subject data for correct user
     seen_data = False
@@ -68,8 +68,7 @@ def runHamiltonianModel(subject_id, subject_id_w):
     for i in range(test_size):
         j = i + train_size
         score = np.subtract(mean_vector, subject_data[j,:])
-        score = np.absolute(score)
-        scores.append(np.sum(score))
+        scores.append(np.linalg.norm(score))
     user_score = sum(scores) / len(scores)
     print("Final score of correct user: {}".format(user_score))
 
@@ -77,9 +76,8 @@ def runHamiltonianModel(subject_id, subject_id_w):
     scores = []
     for i in range(subject_data_w.shape[0]):
         score = np.subtract(mean_vector, subject_data_w[i,:])
-        score = np.absolute(score)
-        scores.append(np.sum(score))
+        scores.append(np.linalg.norm(score))
     user_score_w = sum(scores) / len(scores)
     print("Final score of wrong user: {}".format(user_score_w))
 
-runHamiltonianModel(subject_id, subject_id_w)
+runEuclideanModel(subject_id, subject_id_w)
