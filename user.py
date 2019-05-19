@@ -26,13 +26,15 @@ def push_down(key):
     try:
         print('Standard alphanumeric key {0} pressed'.format(key.char))
         currentKeyDepressedTime = timeit.timeit()
-        if previousKey is not (None, None, None):
+        print(previousKey)
+        if previousKey != (None, None, None):
             # this is not the first key press - generate data that relies on prev
-            print "not first key"
+            print("    not first key")
         # generate data that is just reliant on this key press
+        print("Updating this bad boy")
+        print("HELLLLO")
         currentKeyInfo = (key.char, timeit.timit())
-        
-        
+        print("Chicken sandwich: {0}".format(currentKeyInfo))
     except AttributeError: print('special key {0} pressed'.format(key))
 
 def release(key):
@@ -40,11 +42,9 @@ def release(key):
         print("Terminating.")
         # Stop listener
         return False
-    if key.char
-    print('{0} released'.format(key))
+    print(currentKeyInfo)
+    if currentKeyInfo[1] is not None:
+        print('{0} released after {1} seconds'.format(key.char, timeit.timeit() - currentKeyInfo[1]))
 
 with keyboard.Listener(on_press=push_down, on_release=release) as listener:
     listener.join()
-
-#listener = mouse.Listener(on_press=on_press, on_release=on_release)
-#listener.start()
