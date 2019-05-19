@@ -8,18 +8,22 @@ subject_id = sys.argv[1]
 assert re.match(r'^s[0]*[0-9]*$', subject_id) != None
 
 # collect subject data
+seen_data = False
 subject_data = np.array([[0, 0], [0, 0]])
 with open('password-data.csv') as file:
     data = csv.reader(file, delimiter = ',')
     for row in data:
         if row[0] == 'subject': continue
-        if row[0] != subject_id: 
+        if row[0] != subject_id and seen_data == True: 
             print("Finished data collection.")
             break
+        elif row[0] != subject_id and seen_data == False: continue
+        elif seen_data == False: seen_data = True
         num_row = [float(d) for d in row[3:]]
         new_data = np.array(num_row)
         if subject_data.shape == (2, 2): subject_data = new_data
         else: subject_data = np.vstack([subject_data, new_data])
+assert np.sum(subject_data) > 0.
 
 # partition data
 data_partition = (0.90, 0.10)
