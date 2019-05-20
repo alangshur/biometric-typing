@@ -29,32 +29,40 @@ def push_down(key):
     try:
         print('Standard alphanumeric key {0} pressed'.format(key.char))
         currentKeyDepressedTime = time.time()
-        print(previousKey)
+        #print(previousKey)
         if previousKey != (None, None, None):
             # this is not the first key press - generate data that relies on prev
             print("    not first key")
-        # generate data that is just reliant on this key press
-        print("Updating this bad boy")
+            # what do we need to configure given that this is not the first key?
+        else:
+            print("First key pressed")
+            # only add a vector representing itself
+        # generate data that is just reliant on this key presed
         
         currentKeyInfo = (key.char, time.time())
-        
+
     except AttributeError: print('special key {0} pressed'.format(key))
 
 def release(key):
     global previousKey
     global currentKeyInfo
     global sparse_vector
-    print("")
-    print("")
-    print("")
-    print("")
+    
+    # potentially stop the listening program
     if key == keyboard.Key.esc:
         print("Terminating.")
-        # Stop listener
         return False
-    print(currentKeyInfo)
-    if currentKeyInfo[1] != None:
-        print('{0} released after {1} seconds'.format(key.char, time.time() - currentKeyInfo[1]))
+    try:
+        if key.char == currentKeyInfo[0]:
+            timing = time.time() - currentKeyInfo[1]
+            print(' released after {1} seconds'.format(key.char, timing))
+
+            sparse_vector[(None, key.char, 'H', round(timing, 2))] = 1
+            print(sparse_vector)
+
+    except AttributeError: print('special key {0} released'.format(key))
 
 with keyboard.Listener(on_press=push_down, on_release=release) as listener:
     listener.join()
+
+print("Done reading input")
