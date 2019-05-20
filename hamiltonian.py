@@ -2,15 +2,7 @@ import csv, sys
 import numpy as np
 import re
 
-# get subject
-assert len(sys.argv) == 3
-subject_id = sys.argv[1]
-subject_id_w = sys.argv[2]
-assert re.match(r'^s[0]*[0-9]*$', subject_id) != None
-assert re.match(r'^s[0]*[0-9]*$', subject_id_w) != None
-assert subject_id != subject_id_w
-
-def runEuclideanModel(subject_id, subject_id_w):
+def runHamiltonianModel(subject_id, subject_id_w):
 
     # collect subject data for correct user
     seen_data = False
@@ -19,9 +11,7 @@ def runEuclideanModel(subject_id, subject_id_w):
         data = csv.reader(file, delimiter = ',')
         for row in data:
             if row[0] == 'subject': continue
-            if row[0] != subject_id and seen_data == True: 
-                print("Finished data collection.")
-                break
+            if row[0] != subject_id and seen_data == True: break
             elif row[0] != subject_id and seen_data == False: continue
             elif seen_data == False: seen_data = True
             num_row = [float(d) for d in row[3:]]
@@ -38,7 +28,6 @@ def runEuclideanModel(subject_id, subject_id_w):
         for row in data:
             if row[0] == 'subject': continue
             if row[0] != subject_id_w and seen_data == True: 
-                print("Finished data collection.")
                 break
             elif row[0] != subject_id_w and seen_data == False: continue
             elif seen_data == False: seen_data = True
@@ -54,30 +43,28 @@ def runEuclideanModel(subject_id, subject_id_w):
     dimensions = subject_data.shape
     train_size = int(round(dimensions[0] * data_partition[0]))
     test_size = dimensions[0] - train_size
-    print("Finished data partition.")
 
     # train data for correct user
     mean_vector = [0] * dimensions[1]
     for i in range(train_size):
         mean_vector = np.add(mean_vector, subject_data[i,:])
     mean_vector = np.multiply(1. / float(train_size), mean_vector)
-    print("Finished data training.")
 
     # test data on correct user
     scores = []
     for i in range(test_size):
         j = i + train_size
         score = np.subtract(mean_vector, subject_data[j,:])
-        scores.append(np.linalg.norm(score))
+        score = np.absolute(score)
+        scores.append(np.sum(score))
     user_score = sum(scores) / len(scores)
-    print("Final score of correct user: {}".format(user_score))
 
     # test data on wrong user
     scores = []
     for i in range(subject_data_w.shape[0]):
         score = np.subtract(mean_vector, subject_data_w[i,:])
-        scores.append(np.linalg.norm(score))
+        score = np.absolute(score)
+        scores.append(np.sum(score))
     user_score_w = sum(scores) / len(scores)
-    print("Final score of wrong user: {}".format(user_score_w))
 
-runEuclideanModel(subject_id, subject_id_w)
+    return (subject_id, user_score, subject_id_w, user_score_w)
