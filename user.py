@@ -21,10 +21,13 @@ previousKey = (None, None,                  None)
 #                  v      v
 currentKeyInfo = (None, None)
 
+index = 0
+
 def push_down(key):
     global previousKey
     global currentKeyInfo
     global sparse_vector
+    global index
     # filter out auxillary key presses (shift, capslock, etc.)
     try:
         print('Standard alphanumeric key {0} pressed'.format(key.char))
@@ -32,7 +35,7 @@ def push_down(key):
         #print(previousKey)
         if previousKey != (None, None, None):
             # this is not the first key press - generate data that relies on prev
-            print("    not first key")
+            print("not first key")
             # what do we need to configure given that this is not the first key?
         else:
             print("First key pressed")
@@ -40,6 +43,7 @@ def push_down(key):
         # generate data that is just reliant on this key presed
         
         currentKeyInfo = (key.char, time.time())
+        index += 1
 
     except AttributeError: print('special key {0} pressed'.format(key))
 
@@ -47,17 +51,21 @@ def release(key):
     global previousKey
     global currentKeyInfo
     global sparse_vector
+    global index
     
     # potentially stop the listening program
     if key == keyboard.Key.esc:
         print("Terminating.")
         return False
+    
+    # ensuring that the character input was alphanumeric
     try:
         if key.char == currentKeyInfo[0]:
             timing = time.time() - currentKeyInfo[1]
             print(' released after {1} seconds'.format(key.char, timing))
-
-            sparse_vector[(None, key.char, 'H', round(timing, 2))] = 1
+            
+            # add the sparse vector for 'H'
+            sparse_vector[(None, key.char, 'H', index, round(timing, 2))] = 1
             print(sparse_vector)
 
     except AttributeError: print('special key {0} released'.format(key))
