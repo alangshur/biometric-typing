@@ -7,70 +7,90 @@ import time
 def welcomeUser():
     print("Welcome to Alex, Harry and Ryan's CS221 Project")
     print("Please enter your password (hint, it's \".tie5Roanl\") ")
-    print("If you're a bitch, press esc to exit")
+    print("If you're a bitch, press enter to exit and submit your password so far")
 
 welcomeUser()
 
-# create the sparse vector to be populated
-sparse_vector = {}
-#          what key | time pressed down  | time released (if it exists)
-#               v      v                      v
-previousKey = (None, None,                  None)
+rawData = []
+startTime = None
+endTime = None
+shiftModifier = False
 
-#            what key | time pressed down
-#                  v      v
-currentKeyInfo = (None, None)
 
-index = 0
+#
+# General notes on the below code:
+# Relies heavily on atomicity of Python list operations.  Operations within list
+# indices are not guaranteed to be atomic, but we never modify data here in multiple
+# threads - only add to it.
+#
 
 def push_down(key):
-    global previousKey
-    global currentKeyInfo
-    global sparse_vector
-    global index
-    # filter out auxillary key presses (shift, capslock, etc.)
-    try:
-        print('Standard alphanumeric key {0} pressed'.format(key.char))
-        currentKeyDepressedTime = time.time()
-        #print(previousKey)
-        if previousKey != (None, None, None):
-            # this is not the first key press - generate data that relies on prev
-            print("not first key")
-            # what do we need to configure given that this is not the first key?
-        else:
-            print("First key pressed")
-            # only add a vector representing itself
-        # generate data that is just reliant on this key presed
-        
-        currentKeyInfo = (key.char, time.time())
-        index += 1
-
-    except AttributeError: print('special key {0} pressed'.format(key))
-
-def release(key):
-    global previousKey
-    global currentKeyInfo
-    global sparse_vector
-    global index
+    global startTime
+    global rawData
+    global shiftModifier
     
-    # potentially stop the listening program
-    if key == keyboard.Key.esc:
+    # potentially exit the listener
+    if key == keyboard.Key.enter:
         print("Terminating.")
+        endTime = time.time()
         return False
     
-    # ensuring that the character input was alphanumeric
+    # if alphanumeric, process it as such
     try:
-        if key.char == currentKeyInfo[0]:
-            timing = time.time() - currentKeyInfo[1]
-            print(' released after {1} seconds'.format(key.char, timing))
-            
-            # add the sparse vector for 'H'
-            sparse_vector[(None, key.char, "H", index, round(timing, 2))] = 1
-            print(sparse_vector)
+        print("Standard alphanumeric key {} pressed.".format(key.char))
+        if startTime == None:
+            startTime = time.time()
+        rawData.append( (key.char, "DOWN", time.time() - startTime) )
+    except AttributeError:
+        #print("special key {} pressed".format(key))
+        if key == keyboard.Key.shift or key == keyboard.Key.shift_r:
+            print("EAT MY ASS")
+            shiftModifier = True
 
-    except AttributeError: print('special key {0} released'.format(key))
+def release(key):
+    global startTime
+    global rawData
+    global shiftModifier
+    
+    try:
+        print("Standard alphanumeric key {} released.".format(key.char))
+        if shiftModifier:
+            rawData.append( (rawData[-1][0], "UP", time.time() - startTime) )
+            shiftModifier = False
+        else:
+            rawData.append( (key.char, "UP", time.time() - startTime) )
+    except AttributeError:
+        pass
+        #print("special key {} released".format(key))
+
+def entryClosed(index, opener):
+    global rawData
+    for newIndex in range(index, len(rawData)):
+        potentialCloser = rawData[newIndex]
+        if potentialCloser[1] == "DOWN" and potentialCloser[0] == opener[0]:
+            return True
+    return False
+
+
+def ensureCompleted():
+    global endTime
+    global startTime
+    global rawData
+    for index, opener in enumerate(rawData):
+        # if this is already a closing entry, ignore it
+        if opener[1] == "UP": continue
+        
+        # otherwise, check it's closed.  if not, close it at the end time
+        if not entryClosed(index, opener):
+            rawData.append((opener[0], "UP", endTime - startTime))
 
 with keyboard.Listener(on_press=push_down, on_release=release) as listener:
     listener.join()
 
 print("Done reading input")
+endTime = time.time()
+
+# ensure that all entries in the data are closed
+ensureCompleted()
+#clearRogueDowns()
+print(rawData)
