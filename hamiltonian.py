@@ -27,8 +27,7 @@ def runHamiltonianModel(subject_id, subject_id_w):
         data = csv.reader(file, delimiter = ',')
         for row in data:
             if row[0] == 'subject': continue
-            if row[0] != subject_id_w and seen_data == True: 
-                break
+            if row[0] != subject_id_w and seen_data == True: break
             elif row[0] != subject_id_w and seen_data == False: continue
             elif seen_data == False: seen_data = True
             num_row = [float(d) for d in row[3:]]
