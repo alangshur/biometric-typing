@@ -5,6 +5,22 @@ from collections import defaultdict
 # globally stores the titles of each data entry from csv
 labels = []
 
+# returns list of all features dicts drawn from the csv
+def getPhatPheatures():
+	allFeatures = []
+	with open('data/password-data.csv') as file:
+	data = csv.reader(file, delimiter = ',')
+	for row in data:
+		# at header: populate labels
+		if row[0] == 'subject':
+			labels = row
+		else:
+			keyList = getListFromCSVEntry(row)
+			print(keyList)
+			features = getFeaturesFromList(keyList)
+			allFeatures.append(features)
+	return allFeatures
+
 def getFeaturesFromList(keyList):
 	features = defaultdict(int)
 	# add 1-feature
@@ -62,19 +78,3 @@ def getListFromCSVEntry(row):
 		elif labelList[0] == "DD":
 			time += float(row[index])
 	return attempt
-
-# add csv data to structure
-with open('data/password-data.csv') as file:
-	data = csv.reader(file, delimiter = ',')
-	counter = 0
-	for row in data:
-		# with this conditional, currently just prints one feature set for testing
-		if counter > 1: break
-		# at header: populate labels
-		if row[0] == 'subject':
-			labels = row
-		else:
-			keyList = getListFromCSVEntry(row)
-			print(keyList)
-			features = getFeaturesFromList(keyList)
-			counter += 1
