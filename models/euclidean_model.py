@@ -7,7 +7,7 @@ def runEuclideanModel(subject_id, subject_id_w):
     # collect subject data for correct user
     seen_data = False
     subject_data = np.array([[0, 0], [0, 0]])
-    with open('password-data.csv') as file:
+    with open('../data/password-data.csv') as file:
         data = csv.reader(file, delimiter = ',')
         for row in data:
             if row[0] == 'subject': continue
@@ -25,7 +25,7 @@ def runEuclideanModel(subject_id, subject_id_w):
     # collect subject data for wrong user
     seen_data = False
     subject_data_w = np.array([[0, 0], [0, 0]])
-    with open('password-data.csv') as file:
+    with open('../data/password-data.csv') as file:
         data = csv.reader(file, delimiter = ',')
         for row in data:
             if row[0] == 'subject': continue
