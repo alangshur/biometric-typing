@@ -37,7 +37,7 @@ def push_down(key):
     
     # if alphanumeric, process it as such
     try:
-        print("Standard alphanumeric key {} pressed.".format(key.char))
+        #print("Standard alphanumeric key {} pressed.".format(key.char))
         if startTime == None:
             startTime = time.time()
         rawData.append( (key.char, "DOWN", time.time() - startTime) )
@@ -53,7 +53,7 @@ def release(key):
     global shiftModifier
     
     try:
-        print("Standard alphanumeric key {} released.".format(key.char))
+        #print("Standard alphanumeric key {} released.".format(key.char))
         if shiftModifier:
             rawData.append( (rawData[-1][0], "UP", time.time() - startTime) )
             shiftModifier = False
@@ -71,7 +71,6 @@ def entryClosed(index, opener):
             return True
     return False
 
-
 def ensureCompleted():
     global endTime
     global startTime
@@ -84,6 +83,12 @@ def ensureCompleted():
         if not entryClosed(index, opener):
             rawData.append((opener[0], "UP", endTime - startTime))
 
+def clearRogueUps():
+    global rawData
+    for index, potentialDown in enumerate(rawData):
+        pass
+
+
 with keyboard.Listener(on_press=push_down, on_release=release) as listener:
     listener.join()
 
@@ -92,5 +97,5 @@ endTime = time.time()
 
 # ensure that all entries in the data are closed
 ensureCompleted()
-#clearRogueDowns()
+#clearRogueUps()
 print(rawData)
