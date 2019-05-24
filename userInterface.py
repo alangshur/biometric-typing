@@ -86,7 +86,7 @@ def ensureCompleted():
 def clearRogueUps():
     global rawData
     for index, potentialDown in enumerate(rawData):
-        pass
+
 
 
 with keyboard.Listener(on_press=push_down, on_release=release) as listener:
