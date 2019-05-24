@@ -1,7 +1,7 @@
 import csv, sys, re
 from itertools import combinations
-from hamiltonian import runHamiltonianModel
-from euclidean import runEuclideanModel
+from hamiltonian_model import runHamiltonianModel
+from euclidean_model import runEuclideanModel
 
 def enforceArguments():
     assert len(sys.argv) == 3
@@ -13,7 +13,7 @@ def enforceArguments():
 
 # get subject combinations
 subjects = set()
-with open('password-data.csv') as file:
+with open('../data/password-data.csv') as file:
     data = csv.reader(file, delimiter = ',')
     for row in data: subjects.add(row[0])
 subjects.remove('subject')

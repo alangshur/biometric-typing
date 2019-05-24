@@ -2,18 +2,16 @@ import csv, sys
 import numpy as np
 import re
 
-def runEuclideanModel(subject_id, subject_id_w):
+def runHamiltonianModel(subject_id, subject_id_w):
 
     # collect subject data for correct user
     seen_data = False
     subject_data = np.array([[0, 0], [0, 0]])
-    with open('password-data.csv') as file:
+    with open('../data/password-data.csv') as file:
         data = csv.reader(file, delimiter = ',')
         for row in data:
             if row[0] == 'subject': continue
-            if row[0] != subject_id and seen_data == True: 
-                print("Finished data collection.")
-                break
+            if row[0] != subject_id and seen_data == True: break
             elif row[0] != subject_id and seen_data == False: continue
             elif seen_data == False: seen_data = True
             num_row = [float(d) for d in row[3:]]
@@ -25,7 +23,7 @@ def runEuclideanModel(subject_id, subject_id_w):
     # collect subject data for wrong user
     seen_data = False
     subject_data_w = np.array([[0, 0], [0, 0]])
-    with open('password-data.csv') as file:
+    with open('../data/password-data.csv') as file:
         data = csv.reader(file, delimiter = ',')
         for row in data:
             if row[0] == 'subject': continue
@@ -56,14 +54,16 @@ def runEuclideanModel(subject_id, subject_id_w):
     for i in range(test_size):
         j = i + train_size
         score = np.subtract(mean_vector, subject_data[j,:])
-        scores.append(np.linalg.norm(score))
+        score = np.absolute(score)
+        scores.append(np.sum(score))
     user_score = sum(scores) / len(scores)
 
     # test data on wrong user
     scores = []
     for i in range(subject_data_w.shape[0]):
         score = np.subtract(mean_vector, subject_data_w[i,:])
-        scores.append(np.linalg.norm(score))
+        score = np.absolute(score)
+        scores.append(np.sum(score))
     user_score_w = sum(scores) / len(scores)
 
     return (subject_id, user_score, subject_id_w, user_score_w)
