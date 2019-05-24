@@ -8,8 +8,8 @@ labels = []
 # returns list of all features dicts drawn from the csv
 def getPhatPheatures():
 	allFeatures = []
-	with open('data/password-data.csv') as file:
-	data = csv.reader(file, delimiter = ',')
+	with open('password-data.csv') as file:
+		data = csv.reader(file, delimiter = ',')
 	for row in data:
 		# at header: populate labels
 		if row[0] == 'subject':
