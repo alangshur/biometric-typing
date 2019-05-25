@@ -44,7 +44,6 @@ def push_down(key):
     except AttributeError:
         #print("special key {} pressed".format(key))
         if key == keyboard.Key.shift or key == keyboard.Key.shift_r:
-            print("EAT MY ASS")
             shiftModifier = True
 
 def release(key):
@@ -83,10 +82,23 @@ def ensureCompleted():
         if not entryClosed(index, opener):
             rawData.append((opener[0], "UP", endTime - startTime))
 
+def findPrevious(key):
+    global rawData
+    first = True
+    for entry in rawData[::-1]:
+        if first:
+            first = False
+            continue
+        if entry[0] == key and entry[1] == "DOWN": return entry
+        if entry[0] == key and entry[1] == "UP": return None
+    return None
+
 def clearRogueUps():
     global rawData
-    for index, potentialDown in enumerate(rawData):
-
+    if rawData[-1][1] == "UP":
+        data = findPrevious(rawData[-1][0])
+        if data == None or data[1] == "UP":
+            del rawData[-1]
 
 
 with keyboard.Listener(on_press=push_down, on_release=release) as listener:
@@ -97,5 +109,5 @@ endTime = time.time()
 
 # ensure that all entries in the data are closed
 ensureCompleted()
-#clearRogueUps()
+clearRogueUps()
 print(rawData)
