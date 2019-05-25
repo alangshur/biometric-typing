@@ -51,7 +51,6 @@ def getFeaturesFromList(keyList):
 			features[(currKey, None, "H")] = holdTime
 			prevKey = currKey
 			lastReleaseTime = time
-	print(features)
 	return features
 
 # returns a list of (keyChar, pressed/released, timeIndex) tuples

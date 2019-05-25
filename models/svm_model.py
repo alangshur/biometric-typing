@@ -2,12 +2,8 @@ import collections
 import numpy as np
 import importlib
 
-importlib.import_module('../data/data.py')
-
 def sigmoid(z):
     return 1 / (1 + np.exp(-z))
-
-feat = getPhatPheatures()
 
 class SVMClassification:
 
