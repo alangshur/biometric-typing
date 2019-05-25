@@ -8,17 +8,16 @@ labels = []
 # returns list of all features dicts drawn from the csv
 def getPhatPheatures():
 	allFeatures = []
-	with open('password-data.csv') as file:
+	with open('data/password-data.csv') as file:
 		data = csv.reader(file, delimiter = ',')
-	for row in data:
-		# at header: populate labels
-		if row[0] == 'subject':
-			labels = row
-		else:
-			keyList = getListFromCSVEntry(row)
-			print(keyList)
-			features = getFeaturesFromList(keyList)
-			allFeatures.append(features)
+		for row in data:
+			# at header: populate labels
+			if row[0] == 'subject':
+				labels = row
+			else:
+				keyList = getListFromCSVEntry(row, labels)
+				features = getFeaturesFromList(keyList)
+				allFeatures.append(features)
 	return allFeatures
 
 def getFeaturesFromList(keyList):
@@ -56,11 +55,11 @@ def getFeaturesFromList(keyList):
 	return features
 
 # returns a list of (keyChar, pressed/released, timeIndex) tuples
-def getListFromCSVEntry(row):
+def getListFromCSVEntry(row, labels):
 	# list to fill with data
 	attempt = []
 	time = 0.0
-	for index in range(3, len(row) - 3): # 3-offset avoids metadata at beginning
+	for index in range(3, len(labels)): # 3-offset avoids metadata at beginning
 		label = labels[index]
 		labelList = label.split(".")
 		# time between key press & release held in Hold
