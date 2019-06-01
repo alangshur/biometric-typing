@@ -4,20 +4,13 @@ from pynput import mouse
 import datetime
 import time
 
-def welcomeUser():
-    print("Welcome to Alex, Harry and Ryan's CS221 Project.")
-    print("We will now gather your biometric data - strap in, you're going to need a few minutes!")
-    print("Please enter your password (hint, it's \".tie5Roanl\" - for now!)")
-    print("Press enter to submit your password entry.")
-
-welcomeUser()
-
+# global constants (required for weird multithreading that pynput seems to rely upon)
 rawData = []
 startTime = None
 endTime = None
 shiftModifier = False
 numKeyPresses = 0
-
+counter = 0
 
 #
 # General notes on the below code:
@@ -25,7 +18,12 @@ numKeyPresses = 0
 # indices are not guaranteed to be atomic, but we never modify data here in multiple
 # threads - only add to it.
 #
-counter = 0
+
+def welcomeUser():
+    print("Welcome to Alex, Harry and Ryan's CS221 Project.")
+    print("We will now gather your biometric data - strap in, you're going to need a few minutes!")
+    print("Please enter your password (hint, it's \".tie5Roanl\" - for now!)")
+    print("Press enter to submit your password entry.")
 
 def push_down(key):
     global startTime
@@ -103,23 +101,71 @@ def findPrevious(key):
         if entry[0] == key and entry[1] == "UP": return None
     return None
 
+def findPreviousFromIndex(key, index):
+    global rawData
+    first = True
+    index -= 1
+    while index >= 0:
+        entry = rawData[index]
+        if entry[0] == key and entry[1] == "DOWN": return entry
+        if entry[0] == key and entry[1] == "UP": return None
+        index -=1
+    return None
+
+
 def clearRogueUps():
     global rawData
     if rawData[-1][1] == "UP":
         data = findPrevious(rawData[-1][0])
         if data == None or data[1] == "UP":
             del rawData[-1]
+    
+    index = 0
+    while True:
+        if index == len(rawData): break
+        entry = rawData[index]
+        if entry[1] == "UP":
+            data = findPreviousFromIndex(entry[0], index)
+            if data == None or data[1] == "UP":
+                del rawData[index]
+                continue
+        index += 1
 
-for i in range(10):
+def welcomeUserAndCollectUserPasswordData():
+    global rawData
+    global endTime
+    global startTime
+    global shiftModifier
+    global numKeyPresses
+    global counter
+    
+    welcomeUser()
+    
+    totalData = []
 
-    with keyboard.Listener(on_press=push_down, on_release=release) as listener:
-        listener.join()
+    numPasswordsNeeded = 2
+    for i in range(numPasswordsNeeded):
+        with keyboard.Listener(on_press=push_down, on_release=release) as listener:
+            listener.join()
 
-    print("\n\nThank you.  Now, please re-enter the password (iteration {} of 40)".format(i+1))
+        # ensure that all entries in the data are closed
+        ensureCompleted()
+        clearRogueUps()
+        print()
+        #print(rawData)
+        totalData.append(rawData)
+        
+        # clear the global variables again
+        rawData = []
+        startTime = None
+        endTime = None
+        shiftModifier = False
+        numKeyPresses = 0
+        counter = 0
+        
+        print("Fantastic, now enter the password again!  (Trial {} of {}).".format(i + 1, numPasswordsNeeded))
 
-endTime = time.time()
+    print("Great - we've finished gathering training data from you.  Please wait while we process this information")
+    return totalData
 
-# ensure that all entries in the data are closed
-ensureCompleted()
-clearRogueUps()
-print(rawData)
+welcomeUserAndCollectUserPasswordData()
