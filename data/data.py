@@ -10,7 +10,10 @@ def getCSVFeatures():
 	allFeatures = []
 	with open('data/password-data.csv') as file:
 		data = csv.reader(file, delimiter = ',')
+		counter = 0
 		for row in data:
+			if counter > 1: break
+			counter += 1
 			# at header: populate labels
 			if row[0] == 'subject':
 				labels = row
@@ -20,37 +23,45 @@ def getCSVFeatures():
 				allFeatures.append(features)
 	return allFeatures
 
+# given list of (keystroke, UP/DOWN, time) events, generate features for password attempt
 def getFeaturesFromList(keyList):
+	# DEBUG
+	# print(keyList)
 	features = defaultdict(int)
 	# add 1-feature
 	features[(None, None, None)] = 1
 
-	prevKey, currKey = None, None
-	awaitingRelease = False
-	lastReleaseTime = 0.0
-	lastPressTime = 0.0
-	for entry in keyList:
-		keyChar, event, time = entry
-		if event == "press":
-			# set "flags"
-			currKey = keyChar
-			awaitingRelease = True
-
-			# check if we need to add between-key features
-			if prevKey is not None:
-				upDownTime = time - lastReleaseTime
-				features[(currKey, prevKey, "UD")] = upDownTime
-
-				downDownTime = time - lastPressTime
-				features[(currKey, prevKey, "DD")] = downDownTime
-
-				# update
-				lastPressTime = time
-		elif event == "release":
-			holdTime = time - lastPressTime
-			features[(currKey, None, "H")] = holdTime
-			prevKey = currKey
-			lastReleaseTime = time
+	prevKey = None
+	prevDownTime, prevUpTime = 0.0, 0.0
+	while keyList != []:
+		# take 0-th index entry
+		downEvent = keyList[0]
+		key, event, time = downEvent
+		# if key down event:
+		if event == "DOWN":
+			# search for corresponding key up event w/ matching keystroke
+			upEvent = (None, None, None)
+			index = 0
+			while upEvent[0] != key or upEvent[1] != 'UP':
+				upEvent = keyList[index]
+				index += 1
+			# compute H, UD, DD times
+			holdTime = upEvent[2] - downEvent[2]
+			upDownTime = downEvent[2] - prevUpTime
+			downDownTime = downEvent[2] - prevDownTime
+			# add features based on previous keystroke and previous times
+			features[(None, key, 'H')] = holdTime
+			features[(prevKey, key, 'UD')] = upDownTime
+			features[(prevKey, key, 'DD')] = downDownTime
+			# update latest key up and key down times, and prev key
+			prevDownTime = downEvent[2]
+			prevUpTime = upEvent[2]
+			prevKey = key
+			# remove both key up and key down event from list
+			keyList.remove(downEvent)
+			keyList.remove(upEvent)
+	# DEBUG
+	# print(features)
 	return features
 
 # returns a list of (keyChar, pressed/released, timeIndex) tuples
@@ -67,12 +78,18 @@ def getListFromCSVEntry(row, labels):
 			# special case for shift key
 			if labelList[1] == "Shift":
 				currKey = "R"
-			keyPress = (currKey, "press", time)
+			keyPress = (currKey, "DOWN", time)
 			holdTime = float(row[index])
-			keyRelease = (currKey, "release", time+holdTime)
+			keyRelease = (currKey, "UP", time+holdTime)
 			attempt.append(keyPress)
 			attempt.append(keyRelease)
 		# time between key-presses held in Down-Down
 		elif labelList[0] == "DD":
 			time += float(row[index])
 	return attempt
+
+# DEBUG
+# def test():
+# 	features = getCSVFeatures()
+
+# test()
