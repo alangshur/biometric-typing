@@ -5,9 +5,10 @@ import datetime
 import time
 
 def welcomeUser():
-    print("Welcome to Alex, Harry and Ryan's CS221 Project")
-    print("Please enter your password (hint, it's \".tie5Roanl\") ")
-    print("If you're a bitch, press enter to exit and submit your password so far")
+    print("Welcome to Alex, Harry and Ryan's CS221 Project.")
+    print("We will now gather your biometric data - strap in, you're going to need a few minutes!")
+    print("Please enter your password (hint, it's \".tie5Roanl\" - for now!)")
+    print("Press enter to submit your password entry.")
 
 welcomeUser()
 
@@ -15,6 +16,7 @@ rawData = []
 startTime = None
 endTime = None
 shiftModifier = False
+numKeyPresses = 0
 
 
 #
@@ -23,16 +25,22 @@ shiftModifier = False
 # indices are not guaranteed to be atomic, but we never modify data here in multiple
 # threads - only add to it.
 #
+counter = 0
 
 def push_down(key):
     global startTime
     global rawData
     global shiftModifier
+    global numKeyPresses
+    global counter
     
     # potentially exit the listener
     if key == keyboard.Key.enter:
-        print("Terminating.")
+        #print("Terminating.")
         endTime = time.time()
+        #counter += 1
+        numKeyPresses = 0
+        #print("Thank you.  Now, please re-enter the password (iteration {} of 40)".format(counter))
         return False
     
     # if alphanumeric, process it as such
@@ -41,6 +49,8 @@ def push_down(key):
         if startTime == None:
             startTime = time.time()
         rawData.append( (key.char, "DOWN", time.time() - startTime) )
+        numKeyPresses += 1
+        print("\r" + "*" * numKeyPresses, end ="")
     except AttributeError:
         #print("special key {} pressed".format(key))
         if key == keyboard.Key.shift or key == keyboard.Key.shift_r:
@@ -100,11 +110,13 @@ def clearRogueUps():
         if data == None or data[1] == "UP":
             del rawData[-1]
 
+for i in range(10):
 
-with keyboard.Listener(on_press=push_down, on_release=release) as listener:
-    listener.join()
+    with keyboard.Listener(on_press=push_down, on_release=release) as listener:
+        listener.join()
 
-print("Done reading input")
+    print("\n\nThank you.  Now, please re-enter the password (iteration {} of 40)".format(i+1))
+
 endTime = time.time()
 
 # ensure that all entries in the data are closed
