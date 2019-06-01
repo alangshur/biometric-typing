@@ -4,6 +4,7 @@
 #   //   / / ((   ) ) //___) ) //  ) )      / /    //   ) ) / /   //___) ) //  ) ) //   //   ) ) //   ) ) //___) )
 #  //   / /   \ \    //       //           / /    //   / / / /   //       //      //   //   / / //       //
 # ((___/ / //   ) ) ((____   //         __/ /___ //   / / / /   ((____   //      //   ((___( ( ((____   ((____
+#
 
 # don't uncomment unless you're Ryan and cannot care for your computer properly
 # import sys
@@ -173,10 +174,9 @@ def welcomeUserAndCollectUserPasswordData(numPasswordsNeeded):
 
     i = 0
     while i < numPasswordsNeeded:
-        
         with keyboard.Listener(on_press=push_down, on_release=release) as listener:
             listener.join()
-
+        
         # ensure that all entries in the data are closed
         ensureCompleted()
         clearRogueUps()
@@ -184,7 +184,6 @@ def welcomeUserAndCollectUserPasswordData(numPasswordsNeeded):
         #print(rawData)
         
         # clear the global variables again
-        
         startTime = None
         endTime = None
         shiftModifier = False
