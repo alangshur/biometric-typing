@@ -61,6 +61,8 @@ def getFeaturesFromList(keyList):
 			upEvent = (None, None, None)
 			index = 0
 			while upEvent[0] != key or upEvent[1] != 'UP':
+				# temp fix for index out of range bug
+				if index > len(keyList): break
 				upEvent = keyList[index]
 				index += 1
 			# compute H, UD, DD times
