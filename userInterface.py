@@ -15,6 +15,8 @@ from pynput import mouse
 import datetime
 import time
 from data import data
+import os
+import sys
 
 # global constants (required for weird multithreading that pynput seems to rely upon)
 rawData = []
@@ -23,6 +25,7 @@ endTime = None
 shiftModifier = False
 numKeyPresses = 0
 counter = 0
+actualPassword = ".tie5Roanl"
 
 #
 # General notes on the below code:
@@ -126,7 +129,6 @@ def findPreviousFromIndex(key, index):
         index -=1
     return None
 
-
 def clearRogueUps():
     global rawData
     if rawData[-1][1] == "UP":
@@ -145,7 +147,19 @@ def clearRogueUps():
                 continue
         index += 1
 
-def welcomeUserAndCollectUserPasswordData():
+def passwordProperlyEntered():
+    global rawData
+    global actualPassword
+    
+    buildString = ""
+
+    for entry in rawData:
+        if entry[1] == "DOWN":
+            buildString += entry[0]
+
+    return buildString == actualPassword
+
+def welcomeUserAndCollectUserPasswordData(numPasswordsNeeded):
     global rawData
     global endTime
     global startTime
@@ -157,8 +171,9 @@ def welcomeUserAndCollectUserPasswordData():
     
     totalData = []
 
-    numPasswordsNeeded = 2
-    for i in range(numPasswordsNeeded):
+    i = 0
+    while i < numPasswordsNeeded:
+        
         with keyboard.Listener(on_press=push_down, on_release=release) as listener:
             listener.join()
 
@@ -167,23 +182,29 @@ def welcomeUserAndCollectUserPasswordData():
         clearRogueUps()
         print()
         #print(rawData)
-        totalData.append(rawData)
         
         # clear the global variables again
-        rawData = []
+        
         startTime = None
         endTime = None
         shiftModifier = False
         numKeyPresses = 0
         counter = 0
         
-        print("Fantastic, now enter the password again!  (Trial {} of {}).".format(i + 1, numPasswordsNeeded))
+        if passwordProperlyEntered():
+            totalData.append(rawData)
+            print("Fantastic, now enter the password again!  (Trial {} of {}).".format(i + 1, numPasswordsNeeded))
+            i += 1
+        else:
+            print("Password mis-entered.  Try again:")
+        rawData = []
 
     print("Great - we've finished gathering training data from you.  Please wait while we process this information")
+    print(totalData)
     return totalData
 
 print("And now: the unholy union of Ryan and Harry's work...")
-userData = welcomeUserAndCollectUserPasswordData()
+userData = welcomeUserAndCollectUserPasswordData(3)
 featureVectors = []
 for attempt in userData:
     features = data.getFeaturesFromList(attempt)
