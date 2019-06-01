@@ -1,3 +1,10 @@
+#                                                                                                    ___   ___
+#    //   ) )                                                   //   / /                                / /                                    //  ) )
+#   //___/ /  ( )  ___      ___            __  ___ / __        //   / /  ___      ___      __          / /      __   __  ___  ___      __   __//__  ___      ___      ___
+#  / __  (   / / //   ) ) //   ) ) //   / / / /   //   ) )    //   / / ((   ) ) //___) ) //  ) )      / /    //   ) ) / /   //___) ) //  ) ) //   //   ) ) //   ) ) //___) )
+# //    ) ) / / //   / / //   / / //   / / / /   //   / /    //   / /   \ \    //       //           / /    //   / / / /   //       //      //   //   / / //       //
+#//____/ / / / ((___/ / ((___( ( ((___( ( / /   //   / /    ((___/ / //   ) ) ((____   //         __/ /___ //   / / / /   ((____   //      //   ((___( ( ((____   ((____
+
 import numpy as np
 from pynput import keyboard
 from pynput import mouse
@@ -19,12 +26,14 @@ counter = 0
 # threads - only add to it.
 #
 
+# Welcome the user to the program
 def welcomeUser():
     print("Welcome to Alex, Harry and Ryan's CS221 Project.")
     print("We will now gather your biometric data - strap in, you're going to need a few minutes!")
     print("Please enter your password (hint, it's \".tie5Roanl\" - for now!)")
     print("Press enter to submit your password entry.")
 
+# Intercept keyboard events using pynput handler, perform basic error checking and update global data repo
 def push_down(key):
     global startTime
     global rawData
