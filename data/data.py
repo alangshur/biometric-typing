@@ -70,9 +70,12 @@ def getFeaturesFromList(keyList):
 			upDownTime = downEvent[2] - prevUpTime
 			downDownTime = downEvent[2] - prevDownTime
 			# add features based on previous keystroke and previous times
-			features[(None, key, 'H')] = holdTime
-			features[(prevKey, key, 'UD')] = upDownTime
-			features[(prevKey, key, 'DD')] = downDownTime
+			features[(None, key, 'H', 'linear')] = max(holdTime, 0)
+			features[(None, key, 'H', 'squared')] = holdTime**2
+			features[(prevKey, key, 'UD', 'linear')] = max(upDownTime, 0)
+			features[(prevKey, key, 'UD', 'squared')] = upDownTime**2
+			features[(prevKey, key, 'DD', 'linear')] = max(downDownTime, 0)
+			features[(prevKey, key, 'DD', 'squared')] = downDownTime**2
 			# update latest key up and key down times, and prev key
 			prevDownTime = downEvent[2]
 			prevUpTime = upEvent[2]
