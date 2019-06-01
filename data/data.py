@@ -6,7 +6,7 @@ from collections import defaultdict
 labels = []
 
 # returns list of all features dicts drawn from the csv
-def getPhatPheatures():
+def getCSVFeatures():
 	allFeatures = []
 	with open('data/password-data.csv') as file:
 		data = csv.reader(file, delimiter = ',')

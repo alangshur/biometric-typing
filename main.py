@@ -1,18 +1,26 @@
 from data import data
+import numpy as np
 import math
 
 # get train data
-invalid_data = data.getPhatPheatures()
-valid_data = None
+invalidData = data.getCSVFeatures()
+# validData = None
+
+# filter data
+filteredData = []
+for data in invalidData:
+    entry = np.array(data.values())
+    filteredData.append((entry, 0))
+# for data in validData:
+#     entry = np.array(data.values())
+#     filteredData.append((entry, 1))
 
 # partition data
-invalid_train_size = math.ceil(len(invalid_data) * 0.85)
-invalid_test_size = len(invalid_data) - invalid_train_size
-valid_train_size = math.ceil(len(valid_data) * 0.85)
-valid_test_size = len(valid_data) - valid_train_size
+invalidSplit = math.ceil(len(invalidData) * 0.85)
+invalidTrain = invalidData[:invalidSplit]
+invalidTest = invalidData[invalidSplit:]
+# validSplit = math.ceil(len(validData) * 0.85)
+# validTrain = validData[:validSplit]
+# validTest = validData[validSplit:]
 
-# 
 
-
-print(invalid_train_size)
-print(invalid_test_size)
