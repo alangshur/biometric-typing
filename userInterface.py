@@ -5,11 +5,16 @@
 # //    ) ) / / //   / / //   / / //   / / / /   //   / /    //   / /   \ \    //       //           / /    //   / / / /   //       //      //   //   / / //       //
 #//____/ / / / ((___/ / ((___( ( ((___( ( / /   //   / /    ((___/ / //   ) ) ((____   //         __/ /___ //   / / / /   ((____   //      //   ((___( ( ((____   ((____
 
+# don't uncomment unless you're Ryan and cannot care for your computer properly
+# import sys
+# sys.path.append('/usr/local/lib/python3.7/site-packages')
+
 import numpy as np
 from pynput import keyboard
 from pynput import mouse
 import datetime
 import time
+from data import data
 
 # global constants (required for weird multithreading that pynput seems to rely upon)
 rawData = []
@@ -177,4 +182,10 @@ def welcomeUserAndCollectUserPasswordData():
     print("Great - we've finished gathering training data from you.  Please wait while we process this information")
     return totalData
 
-welcomeUserAndCollectUserPasswordData()
+print("And now: the unholy union of Ryan and Harry's work...")
+userData = welcomeUserAndCollectUserPasswordData()
+featureVectors = []
+for attempt in userData:
+    features = data.getFeaturesFromList(attempt)
+    featureVectors.append(features)
+print(featureVectors)
