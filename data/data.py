@@ -19,6 +19,7 @@
 import re
 import csv
 from collections import defaultdict
+import userInterface
 
 # globally stores the titles of each data entry from csv
 labels = []
@@ -41,7 +42,33 @@ def getCSVFeatures():
 				allFeatures.append(features)
 	return allFeatures
 
+def getNormalizedFeatureSet(attemptList, phi):
+	# TODO
+	return None
+
+# attemptList is a list of defaultdict(int)s, each representing one password
+# attempt for a given user
+# @return phi: a dict from keystroke tuples to average times
+def getPhiFromAttemptList(attemptList):
+	# generate list of (prevKey, currKey, event) keystroke tuples, agnostic to time values
+	phi = {}
+	for f in attemptList[0]:
+		keystroke = (f[0], f[1], f[2])
+		phi[keystroke] = 0.0
+	# populate phi with total times for all attempts
+	for attempt in attemptList:
+		for f in attempt:
+			keystroke = (f[0], f[1], f[2])
+			phi[keystroke] += attempt[f]
+	# normalize phi to get average times
+	for k in phi:
+		phi[k] /= float(len(attemptList))
+
+	return phi
+
+
 # given list of (keystroke, UP/DOWN, time) events, generate features for password attempt
+# each feature represented by (pastKey, currKey, event) tuple
 def getFeaturesFromList(keyList):
 	# DEBUG
 	# print(keyList)
@@ -71,11 +98,11 @@ def getFeaturesFromList(keyList):
 			downDownTime = downEvent[2] - prevDownTime
 			# add features based on previous keystroke and previous times
 			features[(None, key, 'H', 'linear')] = max(holdTime, 0)
-			features[(None, key, 'H', 'squared')] = holdTime**2
+			# features[(None, key, 'H', 'squared')] = holdTime**2
 			features[(prevKey, key, 'UD', 'linear')] = max(upDownTime, 0)
-			features[(prevKey, key, 'UD', 'squared')] = upDownTime**2
+			# features[(prevKey, key, 'UD', 'squared')] = upDownTime**2
 			features[(prevKey, key, 'DD', 'linear')] = max(downDownTime, 0)
-			features[(prevKey, key, 'DD', 'squared')] = downDownTime**2
+			# features[(prevKey, key, 'DD', 'squared')] = downDownTime**2
 			# update latest key up and key down times, and prev key
 			prevDownTime = downEvent[2]
 			prevUpTime = upEvent[2]
@@ -111,8 +138,22 @@ def getListFromCSVEntry(row, labels):
 			time += float(row[index])
 	return attempt
 
-# DEBUG
-# def test():
-# 	features = getCSVFeatures()
+########################################################
+# generateAllFeatureSets
+# returns a tuple of two lists of feature vectors,
+# 	one from the authentic user and one from other users
+########################################################
+def generateAllFeatureSets():
+	return None
 
-# test()
+# DEBUG
+def test():
+	userData = userInterface.welcomeUserAndCollectUserPasswordData(2)
+	features = []
+	for datum in userData:
+		features.append(getFeaturesFromList(datum))
+	phi = getPhiFromAttemptList(features)
+	print('PHI, BITCH:')
+	print(phi)
+
+test()
