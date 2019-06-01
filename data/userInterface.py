@@ -14,7 +14,6 @@ from pynput import keyboard
 from pynput import mouse
 import datetime
 import time
-from data import data
 import os
 import sys
 
@@ -51,33 +50,28 @@ def push_down(key):
     
     # potentially exit the listener
     if key == keyboard.Key.enter:
-        #print("Terminating.")
         endTime = time.time()
-        #counter += 1
         numKeyPresses = 0
-        #print("Thank you.  Now, please re-enter the password (iteration {} of 40)".format(counter))
         return False
     
     # if alphanumeric, process it as such
     try:
-        #print("Standard alphanumeric key {} pressed.".format(key.char))
         if startTime == None:
             startTime = time.time()
         rawData.append( (key.char, "DOWN", time.time() - startTime) )
         numKeyPresses += 1
         print("\r" + "*" * numKeyPresses, end ="")
     except AttributeError:
-        #print("special key {} pressed".format(key))
         if key == keyboard.Key.shift or key == keyboard.Key.shift_r:
             shiftModifier = True
 
+# Asyncronous logic for when keys are released, with basic error checking
 def release(key):
     global startTime
     global rawData
     global shiftModifier
     
     try:
-        #print("Standard alphanumeric key {} released.".format(key.char))
         if shiftModifier:
             rawData.append( (rawData[-1][0], "UP", time.time() - startTime) )
             shiftModifier = False
@@ -85,8 +79,8 @@ def release(key):
             rawData.append( (key.char, "UP", time.time() - startTime) )
     except AttributeError:
         pass
-        #print("special key {} released".format(key))
 
+# Check if a given 'UP' entry has a corresponding down entry
 def entryClosed(index, opener):
     global rawData
     for newIndex in range(index, len(rawData)):
@@ -95,6 +89,7 @@ def entryClosed(index, opener):
             return True
     return False
 
+# Ensure that every up entry is 'closed' - i.e. there is a down event
 def ensureCompleted():
     global endTime
     global startTime
@@ -107,6 +102,7 @@ def ensureCompleted():
         if not entryClosed(index, opener):
             rawData.append((opener[0], "UP", endTime - startTime))
 
+# Find a given up entry's corresponding down entry, if it exists
 def findPrevious(key):
     global rawData
     first = True
@@ -118,6 +114,7 @@ def findPrevious(key):
         if entry[0] == key and entry[1] == "UP": return None
     return None
 
+# Find a given entry's corresponding up/down entry with bounded linear search from a given index
 def findPreviousFromIndex(key, index):
     global rawData
     first = True
@@ -129,6 +126,7 @@ def findPreviousFromIndex(key, index):
         index -=1
     return None
 
+# Clear rogue 'up' entries with no down entries from the list (normally happens with weird shift key antics)
 def clearRogueUps():
     global rawData
     if rawData[-1][1] == "UP":
@@ -147,6 +145,7 @@ def clearRogueUps():
                 continue
         index += 1
 
+# Ensure that the password was properly entered
 def passwordProperlyEntered():
     global rawData
     global actualPassword
@@ -159,6 +158,8 @@ def passwordProperlyEntered():
 
     return buildString == actualPassword
 
+# Actual harness function that gathers user password data entry attempts and returns them to the caller
+# called from data.py
 def welcomeUserAndCollectUserPasswordData(numPasswordsNeeded):
     global rawData
     global endTime
@@ -168,7 +169,6 @@ def welcomeUserAndCollectUserPasswordData(numPasswordsNeeded):
     global counter
     
     welcomeUser()
-    
     totalData = []
 
     i = 0
@@ -200,13 +200,5 @@ def welcomeUserAndCollectUserPasswordData(numPasswordsNeeded):
         rawData = []
 
     print("Great - we've finished gathering training data from you.  Please wait while we process this information")
-    print(totalData)
+    #print(totalData)
     return totalData
-
-print("And now: the unholy union of Ryan and Harry's work...")
-userData = welcomeUserAndCollectUserPasswordData(3)
-featureVectors = []
-for attempt in userData:
-    features = data.getFeaturesFromList(attempt)
-    featureVectors.append(features)
-print(featureVectors)
