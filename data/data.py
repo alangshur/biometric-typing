@@ -263,6 +263,7 @@ def generateAllFeatureSets(mode):
 	return userFeatureSets, CSVFeatureSets
 
 def main():
+<<<<<<< HEAD
     assert sys.argv[1] == 'alex' or sys.argv[1] == 'harry' or sys.argv[1] == 'ryan'
 
     # load previous data
@@ -273,6 +274,20 @@ def main():
         theResurrection.append(getFeaturesFromList(datum))
     file = open('user-password-data-{}.txt'.format(sys.argv[1]), 'wb')
     pickle.dump(theResurrection, file)
+=======
+	assert sys.argv[1] == 'alex' or sys.argv[1] == 'harry' or sys.argv[1] == 'ryan'
+	
+	# load previous data
+	# fileRead = open('user-password-data-{}.txt'.format(sys.argv[1]), 'rb')
+	# theResurrection = pickle.load(fileRead)
+	# prompt user and generate raw feature outputs, akin to CSV file
+	penis = []
+	userData = userInterface.welcomeUserAndCollectUserPasswordData(10, 0)
+	for datum in userData:
+		penis.append(getFeaturesFromList(datum))
+	file = open('user-password-data-{}.txt'.format(sys.argv[1]), 'wb')
+	pickle.dump(penis, file)
+>>>>>>> 671921d46fe8d946a30d8397a7510dfdb238bfc5
 
 if __name__ == '__main__':
 	main()
