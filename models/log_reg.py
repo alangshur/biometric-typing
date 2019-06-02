@@ -40,7 +40,13 @@ class LogisticRegression:
 
                 # update gradient
                 if step == 'normal':
+<<<<<<< HEAD
+                
+                    grad = x * (y - expit(s * np.dot(self.w, x) + self.d))
+                    #print("y: {}, grad: {}".format(y, grad))
+=======
                     grad = x * (y - expit(s * np.dot(self.w, x)))
+>>>>>>> 68971cb52ebf4448ae0497623c197033b652b431
                     update = eta * grad
                 
                 # update ADAM hyperparameters

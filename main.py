@@ -57,8 +57,13 @@ random.shuffle(filteredTrainData)
 random.shuffle(filteredTestData)
 
 # train data
+<<<<<<< HEAD
+model = log_reg.LogisticRegression(filteredTrainData, filteredTestData, T = 0.5, wSize = weightSize)
+model.trainLR(100, 0.2, 'normal')
+=======
 model = log_reg.LogisticRegression(filteredTrainData, filteredTestData, T = 0.56, wSize = weightSize)
 model.trainLR(100, 0.01, 'normal')
+>>>>>>> 68971cb52ebf4448ae0497623c197033b652b431
 
 # test data
 model.testLR()
