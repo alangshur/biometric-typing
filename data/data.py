@@ -52,6 +52,7 @@ def getRandomCSVFeatures(limit):
 			it += 1
 			if it == limit: break
 			row = random.choice(d)
+			if row[0] == 'subject': continue
 			keyList = getListFromCSVEntry(row, labels)
 			features = getFeaturesFromList(keyList)
 			allFeatures.append(features)
@@ -226,7 +227,7 @@ def generateAllFeatureSets(mode):
 		userAttempts = userData.getUserDataFeatures()
 		phi = getPhiFromAttemptList(userAttempts)
 		userFeatureSets = getNormalizedFeatureSet(userAttempts, phi)
-		CSVFeatures = getRandomCSVFeatures(5000) # arbitrary
+		CSVFeatures = getRandomCSVFeatures(1000) # arbitrary
 		CSVFeatureSets = getNormalizedFeatureSet(CSVFeatures, phi)
 
 	else:
