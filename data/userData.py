@@ -5,6 +5,7 @@
 import csv
 import data
 import pickle
+# import userInterface
 
 def getUserDataFeatures():
 	fileRead = open('data/user-password-data.txt', 'rb')
