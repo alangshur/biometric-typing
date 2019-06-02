@@ -73,12 +73,9 @@ def getPhiFromAttemptList(attemptList):
 
 	return phi
 
-
 # given list of (keystroke, UP/DOWN, time) events, generate features for password attempt
 # each feature represented by (pastKey, currKey, event) tuple
 def getFeaturesFromList(keyList):
-	# DEBUG
-	# print(keyList)
 	features = defaultdict(int)
 	# add 1-feature
 	features[(None, None, None)] = 1
@@ -117,8 +114,6 @@ def getFeaturesFromList(keyList):
 			# remove both key up and key down event from list
 			keyList.remove(downEvent)
 			keyList.remove(upEvent)
-	# DEBUG
-	# print(features)
 	return features
 
 # returns a list of (keyChar, pressed/released, timeIndex) tuples
@@ -151,6 +146,15 @@ def getListFromCSVEntry(row, labels):
 			time += float(row[index])
 	return attempt
 
+################################################################################
+# @function: userFeatureSetsFromInterface
+# calls userInterface to request password attempts from user
+# 
+# @return normalizedFeatures: a list of features, normalized by
+# 	their distance from the average time
+# @return phi: a vector representing the average times for each keystroke event
+# 	for a user
+################################################################################
 def userFeatureSetsFromInterface():
 	userData = userInterface.welcomeUserAndCollectUserPasswordData(2, 0)
 	features = []
@@ -160,47 +164,19 @@ def userFeatureSetsFromInterface():
 	normalizedFeatures = getNormalizedFeatureSet(features, phi)
 	return normalizedFeatures, phi
 
-########################################################
-# generateAllFeatureSets
-# returns a tuple of two lists of feature vectors,
-# 	one from the authentic user and one from other users
-########################################################
+################################################################################
+# @function: generateAllFeatureSets
+# generates all normalized features for a user and for CSV entries
+# 
+# @return userFeatureSets: a list of dict() objects representing the features
+# 	for password attempts from the genuine user
+# @return CSVFeatureSets: a list of dict() objects representing the features
+# 	for password attempts from imposters, generated from the CSV
+################################################################################
 def generateAllFeatureSets():
 	# get user data
 	userFeatureSets, phi = userFeatureSetsFromInterface()
-	# get imposter data
-	csvFeatures = getCSVFeatures()
-	CSVFeatureSets = getNormalizedFeatureSet(csvFeatures, phi)
+	# get data from csv
+	CSVFeatures = getCSVFeatures()
+	CSVFeatureSets = getNormalizedFeatureSet(CSVFeatures, phi)
 	return userFeatureSets, CSVFeatureSets
-
-# DEBUG
-# def test():
-# 	userData = userInterface.welcomeUserAndCollectUserPasswordData(5)
-# 	features = []
-# 	for datum in userData:
-# 		features.append(getFeaturesFromList(datum))
-# 	phi = getPhiFromAttemptList(features)
-# 	# print('PHI, BITCH:')
-# 	# print(phi)
-# 	# print("And those dummy thicc raw features, too:")
-# 	print(features)
-# 	normalizedFeatures = getNormalizedFeatureSet(features, phi)
-# 	print("Real Friends:")
-# 	for f in normalizedFeatures:
-# 		print("Trial:")
-# 		print(f)
-# 		print(sum(f.values()))
-
-# 	imposterData = userInterface.welcomeUserAndCollectUserPasswordData(5)
-# 	imposterFeatures = []
-# 	for datum in imposterData:
-# 		imposterFeatures.append(getFeaturesFromList(datum))
-# 	normalizedImposterFeatures = getNormalizedFeatureSet(imposterFeatures, phi)
-# 	print("Fake Friends:")
-# 	for f in normalizedImposterFeatures:
-# 		print("Trial:")
-# 		print(f)
-# 		print(sum(f.values()))
-
-# test()
-generateAllFeatureSets()
