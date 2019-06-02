@@ -264,7 +264,7 @@ def generateAllFeatureSets(mode):
 
 def main():
 	assert sys.argv[1] == 'alex' or sys.argv[1] == 'harry' or sys.argv[1] == 'ryan'
-
+	
 	# load previous data
 	fileRead = open('user-password-data-{}.txt'.format(sys.argv[1]), 'rb')
 	theResurrection = pickle.load(fileRead)
