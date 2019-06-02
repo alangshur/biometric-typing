@@ -20,6 +20,7 @@ import re
 import csv
 from collections import defaultdict
 from data import userInterface
+from data import userData
 
 # globally stores the titles of each data entry from csv
 labels = []
@@ -197,20 +198,26 @@ def userFeatureSetsFromInterface():
 ################################################################################
 def generateAllFeatureSets(mode):
 
-	if mode != 'csv':
+	if mode == 'csv': 
+
+		userFeatureSets, CSVFeatures = getValidCSVFeatures()
+		phi = getPhiFromAttemptList(userFeatureSets)
+		userFeatureSets = getNormalizedFeatureSet(userFeatureSets, phi)
+		CSVFeatureSets = getNormalizedFeatureSet(CSVFeatures, phi)
+
+	elif mode == 'user':
+		userAttempts = getUserDataFeatures()
+		phi = getPhiFromAttemptList(userAttempts)
+		userFeatureSets = getNormalizedFeatureSet(userAttempts, phi)
+		CSVFeatureSets = getNormalizedFeatureSet(CSVFeatures, phi)
+
+	else:
 		
 		# get user data
 		userFeatureSets, phi = userFeatureSetsFromInterface()
 		
 		# get data from csv
 		CSVFeatures = getCSVFeatures()
-		CSVFeatureSets = getNormalizedFeatureSet(CSVFeatures, phi)
-
-	else: 
-
-		userFeatureSets, CSVFeatures = getValidCSVFeatures()
-		phi = getPhiFromAttemptList(userFeatureSets)
-		userFeatureSets = getNormalizedFeatureSet(userFeatureSets, phi)
 		CSVFeatureSets = getNormalizedFeatureSet(CSVFeatures, phi)
 
 	return userFeatureSets, CSVFeatureSets
