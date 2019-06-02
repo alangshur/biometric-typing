@@ -18,4 +18,5 @@ Designed for execution on Linux/macOS systems.  If macOS, requires macOS SIP to 
     - Inference: Score by computing squared Mahalanobis distance between mean vector and new password-timing vector
 - Support-Vector Machine: 
     - Learning classification with kernel functions -- polynomial kernel and radial basis
-   
+- Logistic Regression Classification:
+    - Adam optimization step-size parameter

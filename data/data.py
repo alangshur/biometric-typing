@@ -19,7 +19,10 @@
 import re
 import csv
 from collections import defaultdict
-from data import userInterface
+import userInterface
+import random
+import sys
+import pickle
 
 # globally stores the titles of each data entry from csv
 labels = []
@@ -39,6 +42,25 @@ def getCSVFeatures():
 				allFeatures.append(features)
 	return allFeatures
 
+def getRandomCSVFeatures(limit):
+	it = 0
+	allFeatures = []
+	with open('data/password-data.csv') as file:
+		data = csv.reader(file, delimiter = ',')
+		d = list(data)
+		labels = d[0]
+		while True:
+			it += 1
+			if it == limit: break
+			row = random.choice(d)
+			if row[0] == 'subject': continue
+			keyList = getListFromCSVEntry(row, labels)
+			features = getFeaturesFromList(keyList)
+			allFeatures.append(features)
+	return allFeatures
+
+
+
 def getValidCSVFeatures():
 	allFeatures = []
 	validFeatures = []
@@ -47,7 +69,7 @@ def getValidCSVFeatures():
 		it = 0
 		for row in data:
 			it += 1
-			if it == 2000: break
+			if it == 2001: break
 			# at header: populate labels
 			if row[0] == 'subject':
 				labels = row
@@ -186,6 +208,18 @@ def userFeatureSetsFromInterface():
 	normalizedFeatures = getNormalizedFeatureSet(features, phi)
 	return normalizedFeatures, phi
 
+def getUserDataFeaturesValid():
+	fileRead = open('data/user-password-data-harry.txt', 'rb')
+	userDataFeatures = pickle.load(fileRead)
+	return userDataFeatures
+
+def getUserDataFeaturesInvalid():
+	fileRead1 = open('data/user-password-data-alex.txt', 'rb')
+	fileRead2 = open('data/user-password-data-ryan.txt', 'rb')
+	userDataFeatures1 = pickle.load(fileRead1)
+	userDataFeatures2 = pickle.load(fileRead2)
+	return userDataFeatures1 + userDataFeatures2
+
 ################################################################################
 # @function: generateAllFeatureSets
 # generates all normalized features for a user and for CSV entries
@@ -197,20 +231,49 @@ def userFeatureSetsFromInterface():
 ################################################################################
 def generateAllFeatureSets(mode):
 
-	if mode != 'csv':
-		
-		# get user data
-		userFeatureSets, phi = userFeatureSetsFromInterface()
-		
-		# get data from csv
-		CSVFeatures = getCSVFeatures()
-		CSVFeatureSets = getNormalizedFeatureSet(CSVFeatures, phi)
+	if mode == 'demo':
 
-	else: 
+		userAttempts = getUserDataFeaturesValid()
+		phi = getPhiFromAttemptList(userAttempts)
+		invalidAttempts = getUserDataFeaturesInvalid()
+		userFeatureSets = getNormalizedFeatureSet(userAttempts, phi)
+		CSVFeatureSets = getNormalizedFeatureSet(invalidAttempts, phi)
+
+	elif mode == 'csv': 
 
 		userFeatureSets, CSVFeatures = getValidCSVFeatures()
 		phi = getPhiFromAttemptList(userFeatureSets)
 		userFeatureSets = getNormalizedFeatureSet(userFeatureSets, phi)
 		CSVFeatureSets = getNormalizedFeatureSet(CSVFeatures, phi)
 
+	elif mode == 'user':
+
+		userAttempts = getUserDataFeaturesValid()
+		phi = getPhiFromAttemptList(userAttempts)
+		userFeatureSets = getNormalizedFeatureSet(userAttempts, phi)
+		CSVFeatures = getRandomCSVFeatures(1000) # arbitrary
+		CSVFeatureSets = getNormalizedFeatureSet(CSVFeatures, phi)
+
+	else:
+		
+		userFeatureSets, phi = userFeatureSetsFromInterface()
+		CSVFeatures = getCSVFeatures()
+		CSVFeatureSets = getNormalizedFeatureSet(CSVFeatures, phi)
+
 	return userFeatureSets, CSVFeatureSets
+
+def main():
+	assert sys.argv[1] == 'alex' or sys.argv[1] == 'harry' or sys.argv[1] == 'ryan'
+
+	# load previous data
+	fileRead = open('user-password-data-{}.txt'.format(sys.argv[1]), 'rb')
+	theResurrection = pickle.load(fileRead)
+	# prompt user and generate raw feature outputs, akin to CSV file
+	userData = userInterface.welcomeUserAndCollectUserPasswordData(10, 0)
+	for datum in userData:
+		theResurrection.append(getFeaturesFromList(datum))
+	file = open('user-password-data-{}.txt'.format(sys.argv[1]), 'wb')
+	pickle.dump(theResurrection, file)
+
+if __name__ == '__main__':
+	main()

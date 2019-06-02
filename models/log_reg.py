@@ -40,14 +40,18 @@ class LogisticRegression:
 
                 # update gradient
                 if step == 'normal':
+<<<<<<< HEAD
                 
                     grad = x * (y - expit(s * np.dot(self.w, x) + self.d))
                     #print("y: {}, grad: {}".format(y, grad))
+=======
+                    grad = x * (y - expit(s * np.dot(self.w, x)))
+>>>>>>> 68971cb52ebf4448ae0497623c197033b652b431
                     update = eta * grad
                 
                 # update ADAM hyperparameters
                 elif step == 'adam':
-                    grad = x * (y - expit(s * np.dot(self.w, x) + self.d))
+                    grad = x * (y - expit(s * np.dot(self.w, x)))
                     m = b1 * m + (1 - b1) * grad
                     v = b2 * v + (1 - b2) * np.square(grad)
                     m_hat = m / (1 - np.power(b1, it))
@@ -71,11 +75,10 @@ class LogisticRegression:
         # parse test results
         for data in self.test:
             x, y = data
-            res = np.dot(self.w, x)
-            prediction = int(res > 0)
+            prediction = int(np.dot(self.w, x) > self.d)
             if prediction == 1: predictV += 1
             elif prediction == 0: predictIV += 1
-            print("Y: {}, Prediction: {}".format(y, expit(np.dot(self.w, x) + self.d)))
+            print("Y: {}, Probability Prediction: {}".format(y, expit(s * np.dot(self.w, x))))
             if y == 0:
                 totalIV += 1
                 if prediction == 0: corrIV += 1
