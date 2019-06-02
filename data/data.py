@@ -21,6 +21,7 @@ import csv
 from collections import defaultdict
 from data import userInterface
 from data import userData
+import random
 
 # globally stores the titles of each data entry from csv
 labels = []
@@ -38,6 +39,22 @@ def getCSVFeatures():
 				keyList = getListFromCSVEntry(row, labels)
 				features = getFeaturesFromList(keyList)
 				allFeatures.append(features)
+	return allFeatures
+
+def getRandomCSVFeatures(limit):
+	it = 0
+	allFeatures = []
+	with open('data/password-data.csv') as file:
+		data = csv.reader(file, delimiter = ',')
+		d = list(data)
+		labels = d[0]
+		while True:
+			it += 1
+			if it == limit: break
+			row = random.choice(d)
+			keyList = getListFromCSVEntry(row, labels)
+			features = getFeaturesFromList(keyList)
+			allFeatures.append(features)
 	return allFeatures
 
 def getValidCSVFeatures():
