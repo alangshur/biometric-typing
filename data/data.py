@@ -19,7 +19,7 @@
 import re
 import csv
 from collections import defaultdict
-import userInterface
+from data import userInterface
 
 # globally stores the titles of each data entry from csv
 labels = []
@@ -39,6 +39,28 @@ def getCSVFeatures():
 				allFeatures.append(features)
 	return allFeatures
 
+def getValidCSVFeatures():
+	allFeatures = []
+	validFeatures = []
+	with open('data/password-data.csv') as file:
+		data = csv.reader(file, delimiter = ',')
+		it = 0
+		for row in data:
+			it += 1
+			if it == 2000: break
+			# at header: populate labels
+			if row[0] == 'subject':
+				labels = row
+			elif row[0] == 's002':
+				keyList = getListFromCSVEntry(row, labels)
+				features = getFeaturesFromList(keyList)
+				validFeatures.append(features)
+			else:
+				keyList = getListFromCSVEntry(row, labels)
+				features = getFeaturesFromList(keyList)
+				allFeatures.append(features)
+	return validFeatures, allFeatures
+
 # given list of attempts, return list of features normalized by phi
 def getNormalizedFeatureSet(attemptList, phi):
 	normalized = []
@@ -46,7 +68,7 @@ def getNormalizedFeatureSet(attemptList, phi):
 		normalizedAttempt = {}
 		for feature in attempt:
 			keystroke = (feature[0], feature[1], feature[2])
-			difference = abs(attempt[feature] - phi[keystroke])
+			difference = attempt[feature] - phi[keystroke]
 			normalizedAttempt[feature] = difference
 			if feature[1] != None:
 				normalizedAttempt[(feature[0], feature[1], feature[2], 'squared')] = difference**2
@@ -173,10 +195,22 @@ def userFeatureSetsFromInterface():
 # @return CSVFeatureSets: a list of dict() objects representing the features
 # 	for password attempts from imposters, generated from the CSV
 ################################################################################
-def generateAllFeatureSets():
-	# get user data
-	userFeatureSets, phi = userFeatureSetsFromInterface()
-	# get data from csv
-	CSVFeatures = getCSVFeatures()
-	CSVFeatureSets = getNormalizedFeatureSet(CSVFeatures, phi)
+def generateAllFeatureSets(mode):
+
+	if mode != 'csv':
+		
+		# get user data
+		userFeatureSets, phi = userFeatureSetsFromInterface()
+		
+		# get data from csv
+		CSVFeatures = getCSVFeatures()
+		CSVFeatureSets = getNormalizedFeatureSet(CSVFeatures, phi)
+
+	else: 
+
+		userFeatureSets, CSVFeatures = getValidCSVFeatures()
+		phi = getPhiFromAttemptList(userFeatureSets)
+		userFeatureSets = getNormalizedFeatureSet(userFeatureSets, phi)
+		CSVFeatureSets = getNormalizedFeatureSet(CSVFeatures, phi)
+
 	return userFeatureSets, CSVFeatureSets

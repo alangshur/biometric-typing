@@ -25,26 +25,40 @@
 from data import data
 import numpy as np
 import math
+from models import log_reg
+import random, sys
+
+mode = sys.argv[1]
 
 # get train data
-invalidData = data.getCSVFeatures()
-# validData = None
+validData, invalidData = data.generateAllFeatureSets(mode)
 
 # filter data
-filteredData = []
+filteredDataV, filteredDataIV, ordering = [], [], list(validData[0].keys())
 for data in invalidData:
-    entry = np.array(data.values())
-    filteredData.append((entry, 0))
-# for data in validData:
-#     entry = np.array(data.values())
-#     filteredData.append((entry, 1))
+    values = []
+    for key in ordering: values.append(data[key])
+    entry = np.array(values)
+    filteredDataIV.append((entry, 0))
+for data in validData:
+    weightSize = len(data)
+    values = []
+    for key in ordering: values.append(data[key])
+    entry = np.array(values)
+    filteredDataV.append((entry, 1))
 
 # partition data
-invalidSplit = math.ceil(len(invalidData) * 0.85)
-invalidTrain = invalidData[:invalidSplit]
-invalidTest = invalidData[invalidSplit:]
-# validSplit = math.ceil(len(validData) * 0.85)
-# validTrain = validData[:validSplit]
-# validTest = validData[validSplit:]
+filteredTrainData, filteredTestData = [], []
+validSplit = math.ceil(len(filteredDataV) * 0.85)
+invalidSplit = math.ceil(len(filteredDataIV) * 0.85)
+filteredTrainData = filteredDataIV[:invalidSplit] + filteredDataV[:validSplit]
+filteredTestData = filteredDataIV[invalidSplit:] + filteredDataV[validSplit:]
+random.shuffle(filteredTrainData)
+random.shuffle(filteredTestData)
 
+# train data
+model = log_reg.LogisticRegression(filteredTrainData, filteredTestData, T = 0.5, wSize = weightSize)
+model.trainLR(100, 0.00001, 'normal')
 
+# test data
+model.testLR()
