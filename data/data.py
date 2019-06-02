@@ -206,7 +206,7 @@ def generateAllFeatureSets(mode):
 		CSVFeatureSets = getNormalizedFeatureSet(CSVFeatures, phi)
 
 	elif mode == 'user':
-		userAttempts = getUserDataFeatures()
+		userAttempts = userData.getUserDataFeatures()
 		phi = getPhiFromAttemptList(userAttempts)
 		userFeatureSets = getNormalizedFeatureSet(userAttempts, phi)
 		CSVFeatureSets = getNormalizedFeatureSet(CSVFeatures, phi)

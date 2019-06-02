@@ -3,7 +3,6 @@
 # ...feels bad man
 
 import csv
-import userInterface
 import data
 import pickle
 
