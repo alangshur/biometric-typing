@@ -266,15 +266,14 @@ def main():
 	assert sys.argv[1] == 'alex' or sys.argv[1] == 'harry' or sys.argv[1] == 'ryan'
 	
 	# load previous data
-	# fileRead = open('user-password-data-{}.txt'.format(sys.argv[1]), 'rb')
-	# theResurrection = pickle.load(fileRead)
+	fileRead = open('user-password-data-{}.txt'.format(sys.argv[1]), 'rb')
+	theResurrection = pickle.load(fileRead)
 	# prompt user and generate raw feature outputs, akin to CSV file
-	penis = []
 	userData = userInterface.welcomeUserAndCollectUserPasswordData(10, 0)
 	for datum in userData:
-		penis.append(getFeaturesFromList(datum))
+		theResurrection.append(getFeaturesFromList(datum))
 	file = open('user-password-data-{}.txt'.format(sys.argv[1]), 'wb')
-	pickle.dump(penis, file)
+	pickle.dump(theResurrection, file)
 
 if __name__ == '__main__':
 	main()
