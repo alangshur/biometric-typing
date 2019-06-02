@@ -19,7 +19,7 @@
 import re
 import csv
 from collections import defaultdict
-import userInterface
+from data import userInterface
 import random
 import sys
 import pickle
