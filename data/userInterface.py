@@ -161,7 +161,7 @@ def passwordProperlyEntered():
 
 # Actual harness function that gathers user password data entry attempts and returns them to the caller
 # called from data.py
-def welcomeUserAndCollectUserPasswordData(numPasswordsNeeded):
+def welcomeUserAndCollectUserPasswordData(numPasswordsNeeded, numRunupNeeded):
     global rawData
     global endTime
     global startTime
@@ -173,7 +173,7 @@ def welcomeUserAndCollectUserPasswordData(numPasswordsNeeded):
     totalData = []
 
     i = 0
-    while i < numPasswordsNeeded:
+    while i < numPasswordsNeeded + numRunupNeeded:
         with keyboard.Listener(on_press=push_down, on_release=release) as listener:
             listener.join()
         
@@ -191,8 +191,9 @@ def welcomeUserAndCollectUserPasswordData(numPasswordsNeeded):
         counter = 0
         
         if passwordProperlyEntered():
-            totalData.append(rawData)
-            print("Fantastic, now enter the password again!  (Trial {} of {}).".format(i + 1, numPasswordsNeeded))
+            if i >= numRunupNeeded:
+                totalData.append(rawData)
+            print("Fantastic, now enter the password again!  (Trial {} of {}).".format(i + 1, numPasswordsNeeded + numRunupNeeded))
             i += 1
         else:
             print("Password mis-entered.  Try again:")
