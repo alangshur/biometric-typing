@@ -29,10 +29,7 @@ def getCSVFeatures():
 	allFeatures = []
 	with open('data/password-data.csv') as file:
 		data = csv.reader(file, delimiter = ',')
-		counter = 0
 		for row in data:
-			if counter > 1: break
-			counter += 1
 			# at header: populate labels
 			if row[0] == 'subject':
 				labels = row
@@ -46,12 +43,13 @@ def getCSVFeatures():
 def getNormalizedFeatureSet(attemptList, phi):
 	normalized = []
 	for attempt in attemptList:
-		print('Attempt:')
-		print(attempt)
 		normalizedAttempt = {}
 		for feature in attempt:
 			keystroke = (feature[0], feature[1], feature[2])
-			normalizedAttempt[feature] = abs(attempt[feature] - phi[keystroke])
+			difference = abs(attempt[feature] - phi[keystroke])
+			normalizedAttempt[feature] = difference
+			if feature[1] != None:
+				normalizedAttempt[(feature[0], feature[1], feature[2], 'squared')] = difference**2
 		normalized.append(normalizedAttempt)
 	return normalized
 
@@ -134,9 +132,15 @@ def getListFromCSVEntry(row, labels):
 		# time between key press & release held in Hold
 		if labelList[0] == "H":
 			currKey = labelList[1]
+			if currKey == "Return": continue
 			# special case for shift key
 			if labelList[1] == "Shift":
 				currKey = "R"
+			# special cases for 'period' and 'five'
+			if currKey == "period":
+				currKey = "."
+			if currKey == "five":
+				currKey = "5"
 			keyPress = (currKey, "DOWN", time)
 			holdTime = float(row[index])
 			keyRelease = (currKey, "UP", time+holdTime)
@@ -147,41 +151,56 @@ def getListFromCSVEntry(row, labels):
 			time += float(row[index])
 	return attempt
 
+def userFeatureSetsFromInterface():
+	userData = userInterface.welcomeUserAndCollectUserPasswordData(2, 0)
+	features = []
+	for datum in userData:
+		features.append(getFeaturesFromList(datum))
+	phi = getPhiFromAttemptList(features)
+	normalizedFeatures = getNormalizedFeatureSet(features, phi)
+	return normalizedFeatures, phi
+
 ########################################################
 # generateAllFeatureSets
 # returns a tuple of two lists of feature vectors,
 # 	one from the authentic user and one from other users
 ########################################################
 def generateAllFeatureSets():
-	return None
+	# get user data
+	userFeatureSets, phi = userFeatureSetsFromInterface()
+	# get imposter data
+	csvFeatures = getCSVFeatures()
+	CSVFeatureSets = getNormalizedFeatureSet(csvFeatures, phi)
+	return userFeatureSets, CSVFeatureSets
 
 # DEBUG
-def test():
-	userData = userInterface.welcomeUserAndCollectUserPasswordData(5)
-	features = []
-	for datum in userData:
-		features.append(getFeaturesFromList(datum))
-	phi = getPhiFromAttemptList(features)
-	# print('PHI, BITCH:')
-	# print(phi)
-	# print("And those dummy thicc raw features, too:")
-	print(features)
-	normalizedFeatures = getNormalizedFeatureSet(features, phi)
-	print("Real Friends:")
-	for f in normalizedFeatures:
-		print("Trial:")
-		print(f)
-		print(sum(f.values()))
+# def test():
+# 	userData = userInterface.welcomeUserAndCollectUserPasswordData(5)
+# 	features = []
+# 	for datum in userData:
+# 		features.append(getFeaturesFromList(datum))
+# 	phi = getPhiFromAttemptList(features)
+# 	# print('PHI, BITCH:')
+# 	# print(phi)
+# 	# print("And those dummy thicc raw features, too:")
+# 	print(features)
+# 	normalizedFeatures = getNormalizedFeatureSet(features, phi)
+# 	print("Real Friends:")
+# 	for f in normalizedFeatures:
+# 		print("Trial:")
+# 		print(f)
+# 		print(sum(f.values()))
 
-	imposterData = userInterface.welcomeUserAndCollectUserPasswordData(5)
-	imposterFeatures = []
-	for datum in imposterData:
-		imposterFeatures.append(getFeaturesFromList(datum))
-	normalizedImposterFeatures = getNormalizedFeatureSet(imposterFeatures, phi)
-	print("Fake Friends:")
-	for f in normalizedImposterFeatures:
-		print("Trial:")
-		print(f)
-		print(sum(f.values()))
+# 	imposterData = userInterface.welcomeUserAndCollectUserPasswordData(5)
+# 	imposterFeatures = []
+# 	for datum in imposterData:
+# 		imposterFeatures.append(getFeaturesFromList(datum))
+# 	normalizedImposterFeatures = getNormalizedFeatureSet(imposterFeatures, phi)
+# 	print("Fake Friends:")
+# 	for f in normalizedImposterFeatures:
+# 		print("Trial:")
+# 		print(f)
+# 		print(sum(f.values()))
 
-test()
+# test()
+generateAllFeatureSets()
