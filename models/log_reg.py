@@ -69,11 +69,10 @@ class LogisticRegression:
         # parse test results
         for data in self.test:
             x, y = data
-            res = np.dot(self.w, x)
-            prediction = int(res > 0)
+            prediction = int(expit(np.dot(self.w, x) + self.d) > 0.39)
             if prediction == 1: predictV += 1
             elif prediction == 0: predictIV += 1
-            print("Y: {}, Prediction: {}".format(y, expit(np.dot(self.w, x) + self.d)))
+            print("Y: {}, Probability Prediction: {}".format(y, expit(np.dot(self.w, x) + self.d)))
             if y == 0:
                 totalIV += 1
                 if prediction == 0: corrIV += 1

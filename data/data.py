@@ -47,7 +47,7 @@ def getValidCSVFeatures():
 		it = 0
 		for row in data:
 			it += 1
-			if it == 2000: break
+			if it == 2001: break
 			# at header: populate labels
 			if row[0] == 'subject':
 				labels = row
