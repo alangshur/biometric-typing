@@ -10,6 +10,7 @@ import numpy as np
 import math
 from models import log_reg
 import random, sys
+from os import system
 mode = sys.argv[1]
 
 # get train data
@@ -39,26 +40,32 @@ random.shuffle(filteredTrainData)
 random.shuffle(filteredTestData)
 
 # train data
-model = log_reg.LogisticRegression(filteredTrainData, filteredTestData, T = 0.5, wSize = weightSize)
-model.trainLR(1000, 0.01, 'adam')
+model = log_reg.LogisticRegression(filteredTrainData, filteredTestData, T = 0.33, wSize = weightSize)
+model.trainLR(1000, 0.01, 'normal')
+# model = log_reg.LogisticRegression(filteredTrainData, filteredTestData, T = 0.5, wSize = weightSize)
+# model.trainLR(100, 0.01, 'adam')
 
 # test data
 model.testLR()
 
 # live demo
 def liveDemo(model, phi):
+    res = 0
     while True:
+        input("\nPress enter to begin demo!")
         try:
             while True:
-                print("Please enter password three times:\n")
-                attempt1 = data.requestPasswordAttempt(phi)
-                attempt2 = data.requestPasswordAttempt(phi)
-                attempt3 = data.requestPasswordAttempt(phi)
-                model.testDemo(attempt1, attempt2, attempt3, ordering)
+                system('clear') 
+                if res != 0:
+                    print("\n----- Probability Prediction: {}% -----\n".format(str(round(res * 100, 2))))
+                print("Please enter password:")
+                attempt = data.requestPasswordAttempt(phi)
+                res = model.testDemo(attempt, ordering)
         except: 
-            print("\n\n\n\nCaught error. Would you like to continue?")
             response = ''
             while response != 'Yes' and response != 'No':
+                system('clear') 
+                print("Caught error. Would you like to continue?")
                 response = input('(Yes/No): ')
             if response == 'No': break
 if mode == 'demo':

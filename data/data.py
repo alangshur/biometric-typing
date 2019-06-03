@@ -216,11 +216,11 @@ def getUserDataFeaturesValid():
 	return userDataFeatures
 
 def getUserDataFeaturesInvalid():
-	fileRead1 = open('data/user-password-data-alex.txt', 'rb')
+	# fileRead1 = open('data/user-password-data-alex.txt', 'rb')
 	fileRead2 = open('data/user-password-data-ryan.txt', 'rb')
-	userDataFeatures1 = pickle.load(fileRead1)
+	# userDataFeatures1 = pickle.load(fileRead1)
 	userDataFeatures2 = pickle.load(fileRead2)
-	return userDataFeatures1 + userDataFeatures2
+	return userDataFeatures2
 
 ################################################################################
 # @function: generateAllFeatureSets
