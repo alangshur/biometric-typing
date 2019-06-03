@@ -1,18 +1,17 @@
-#██╗      ██████╗  ██████╗ ██╗███████╗████████╗██╗ ██████╗
-#██║     ██╔═══██╗██╔════╝ ██║██╔════╝╚══██╔══╝██║██╔════╝
-#██║     ██║   ██║██║  ███╗██║███████╗   ██║   ██║██║
-#██║     ██║   ██║██║   ██║██║╚════██║   ██║   ██║██║
-#███████╗╚██████╔╝╚██████╔╝██║███████║   ██║   ██║╚██████╗
-#╚══════╝ ╚═════╝  ╚═════╝ ╚═╝╚══════╝   ╚═╝   ╚═╝ ╚═════╝
-#
-#██████╗ ███████╗ ██████╗ ██████╗ ███████╗███████╗███████╗██╗ ██████╗ ███╗   ██╗
-#██╔══██╗██╔════╝██╔════╝ ██╔══██╗██╔════╝██╔════╝██╔════╝██║██╔═══██╗████╗  ██║
-#██████╔╝█████╗  ██║  ███╗██████╔╝█████╗  ███████╗███████╗██║██║   ██║██╔██╗ ██║
-#██╔══██╗██╔══╝  ██║   ██║██╔══██╗██╔══╝  ╚════██║╚════██║██║██║   ██║██║╚██╗██║
-#██║  ██║███████╗╚██████╔╝██║  ██║███████╗███████║███████║██║╚██████╔╝██║ ╚████║
-#╚═╝  ╚═╝╚══════╝ ╚═════╝ ╚═╝  ╚═╝╚══════╝╚══════╝╚══════╝╚═╝ ╚═════╝ ╚═╝  ╚═══╝
-
-
+# ██╗      ██████╗  ██████╗ ██╗███████╗████████╗██╗ ██████╗                      
+# ██║     ██╔═══██╗██╔════╝ ██║██╔════╝╚══██╔══╝██║██╔════╝                      
+# ██║     ██║   ██║██║  ███╗██║███████╗   ██║   ██║██║                           
+# ██║     ██║   ██║██║   ██║██║╚════██║   ██║   ██║██║                           
+# ███████╗╚██████╔╝╚██████╔╝██║███████║   ██║   ██║╚██████╗                      
+# ╚══════╝ ╚═════╝  ╚═════╝ ╚═╝╚══════╝   ╚═╝   ╚═╝ ╚═════╝                      
+                                                                               
+# ██████╗ ███████╗ ██████╗ ██████╗ ███████╗███████╗███████╗██╗ ██████╗ ███╗   ██╗
+# ██╔══██╗██╔════╝██╔════╝ ██╔══██╗██╔════╝██╔════╝██╔════╝██║██╔═══██╗████╗  ██║
+# ██████╔╝█████╗  ██║  ███╗██████╔╝█████╗  ███████╗███████╗██║██║   ██║██╔██╗ ██║
+# ██╔══██╗██╔══╝  ██║   ██║██╔══██╗██╔══╝  ╚════██║╚════██║██║██║   ██║██║╚██╗██║
+# ██║  ██║███████╗╚██████╔╝██║  ██║███████╗███████║███████║██║╚██████╔╝██║ ╚████║
+# ╚═╝  ╚═╝╚══════╝ ╚═════╝ ╚═╝  ╚═╝╚══════╝╚══════╝╚══════╝╚═╝ ╚═════╝ ╚═╝  ╚═══╝
+                                                         
 import collections, math, random
 from scipy.special import expit
 import numpy as np
@@ -25,6 +24,7 @@ class LogisticRegression:
         self.w = np.array([0] * wSize)
         self.wSize = wSize
         self.d = math.log(T / (1 - T))
+        self.T = T
         self.trained = False
 
     def SGA(self, epochs, eta, step, b1 = 0.9, b2 = 0.999, e = 10e-8, s = 1):
@@ -61,13 +61,20 @@ class LogisticRegression:
     def trainLR(self, epochs, eta, step):
         self.SGA(epochs, eta, step)
 
-    def testDemo(self, attempt):
-        values = []
-        a = attempt[0]
-        for key in a: values.append(a[key])
-        x = np.array(values)
-        prediction = int(np.dot(self.w, x) > self.d)
-        print("Probability Prediction: {}".format(expit(np.dot(self.w, x))))
+    def testDemo(self, attempt1, attempt2, attempt3, ordering):
+        values1, values2, values3 = [], [], []
+        for key in ordering: 
+            values1.append(attempt1[0][key])
+            values2.append(attempt2[0][key])
+            values3.append(attempt3[0][key])
+        pred1 = expit(np.dot(self.w, np.array(values1)))
+        pred2 = expit(np.dot(self.w, np.array(values2)))
+        pred3 = expit(np.dot(self.w, np.array(values3)))
+        res = (math.exp(-pred1 / 3) * pred1 + math.exp(-pred2 / 3) * pred2 + \
+            math.exp(-pred3 / 3) * pred3) / (math.exp(-pred1 / 3) + \
+            math.exp(-pred2 / 3) +  math.exp(-pred3 / 3))
+
+        print("\n----- Probability Prediction: {} -----\n\n".format(res))
 
     def testLR(self, s = 1):
         assert self.trained == True

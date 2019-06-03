@@ -1,33 +1,15 @@
-#          _____                    _____                    _____                    _____
-#         /\    \                  /\    \                  /\    \                  /\    \
-#        /::\____\                /::\    \                /::\    \                /::\____\
-#       /::::|   |               /::::\    \               \:::\    \              /::::|   |
-#      /:::::|   |              /::::::\    \               \:::\    \            /:::::|   |
-#     /::::::|   |             /:::/\:::\    \               \:::\    \          /::::::|   |
-#    /:::/|::|   |            /:::/__\:::\    \               \:::\    \        /:::/|::|   |
-#   /:::/ |::|   |           /::::\   \:::\    \              /::::\    \      /:::/ |::|   |
-#  /:::/  |::|___|______    /::::::\   \:::\    \    ____    /::::::\    \    /:::/  |::|   | _____
-# /:::/   |::::::::\    \  /:::/\:::\   \:::\    \  /\   \  /:::/\:::\    \  /:::/   |::|   |/\    \
-#/:::/    |:::::::::\____\/:::/  \:::\   \:::\____\/::\   \/:::/  \:::\____\/:: /    |::|   /::\____\
-#\::/    / ~~~~~/:::/    /\::/    \:::\  /:::/    /\:::\  /:::/    \::/    /\::/    /|::|  /:::/    /
-# \/____/      /:::/    /  \/____/ \:::\/:::/    /  \:::\/:::/    / \/____/  \/____/ |::| /:::/    /
-#             /:::/    /            \::::::/    /    \::::::/    /                   |::|/:::/    /
-#            /:::/    /              \::::/    /      \::::/____/                    |::::::/    /
-#           /:::/    /               /:::/    /        \:::\    \                    |:::::/    /
-#          /:::/    /               /:::/    /          \:::\    \                   |::::/    /
-#         /:::/    /               /:::/    /            \:::\    \                  /:::/    /
-#        /:::/    /               /:::/    /              \:::\____\                /:::/    /
-#        \::/    /                \::/    /                \::/    /                \::/    /
-#         \/____/                  \/____/                  \/____/                  \/____/
-#                                                                                                    
-
+# ███╗   ███╗ █████╗ ██╗███╗   ██╗
+# ████╗ ████║██╔══██╗██║████╗  ██║
+# ██╔████╔██║███████║██║██╔██╗ ██║
+# ██║╚██╔╝██║██╔══██║██║██║╚██╗██║
+# ██║ ╚═╝ ██║██║  ██║██║██║ ╚████║
+# ╚═╝     ╚═╝╚═╝  ╚═╝╚═╝╚═╝  ╚═══╝
 
 from data import data
 import numpy as np
 import math
 from models import log_reg
 import random, sys
-
 mode = sys.argv[1]
 
 # get train data
@@ -63,12 +45,22 @@ model.trainLR(1000, 0.01, 'adam')
 # test data
 model.testLR()
 
-def liveDemo(model, phi):
-	while True:
-		attempt = data.requestPasswordAttempt(phi)
-		model.testDemo(attempt)
-
 # live demo
+def liveDemo(model, phi):
+    while True:
+        try:
+            while True:
+                print("Please enter password three times:\n")
+                attempt1 = data.requestPasswordAttempt(phi)
+                attempt2 = data.requestPasswordAttempt(phi)
+                attempt3 = data.requestPasswordAttempt(phi)
+                model.testDemo(attempt1, attempt2, attempt3, ordering)
+        except: 
+            print("\n\n\n\nCaught error. Would you like to continue?")
+            response = ''
+            while response != 'Yes' and response != 'No':
+                response = input('(Yes/No): ')
+            if response == 'No': break
 if mode == 'demo':
-	liveDemo(model, phi)
-	
+    liveDemo(model, phi)
+    

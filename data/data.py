@@ -1,20 +1,9 @@
-#'########::'##::::'##::::'###::::'########:::   '########:'########::::'###::::'########:'##::::'##:'########::'########:
-# ##.... ##: ##:::: ##:::'## ##:::... ##..::::    ##.....:: ##.....::::'## ##:::... ##..:: ##:::: ##: ##.... ##: ##.....::
-# ##:::: ##: ##:::: ##::'##:. ##::::: ##::::::    ##::::::: ##::::::::'##:. ##::::: ##:::: ##:::: ##: ##:::: ##: ##:::::::
-# ########:: #########:'##:::. ##:::: ##::::::    ######::: ######:::'##:::. ##:::: ##:::: ##:::: ##: ########:: ######:::
-# ##.....::: ##.... ##: #########:::: ##::::::    ##...:::: ##...:::: #########:::: ##:::: ##:::: ##: ##.. ##::: ##...::::
-# ##:::::::: ##:::: ##: ##.... ##:::: ##::::::    ##::::::: ##::::::: ##.... ##:::: ##:::: ##:::: ##: ##::. ##:: ##:::::::
-# ##:::::::: ##:::: ##: ##:::: ##:::: ##::::::    ##::::::: ########: ##:::: ##:::: ##::::. #######:: ##:::. ##: ########:
-#..:::::::::..:::::..::..:::::..:::::..:::::::.   .::::::::........::..:::::..:::::..::::::.......:::..:::::..::........::
-#
-#      '########:'##::::'##:'########:'########:::::'###:::::'######::'########::'#######::'########::
-#       ##.....::. ##::'##::... ##..:: ##.... ##:::'## ##:::'##... ##:... ##..::'##.... ##: ##.... ##:
-#       ##::::::::. ##'##:::::: ##:::: ##:::: ##::'##:. ##:: ##:::..::::: ##:::: ##:::: ##: ##:::: ##:
-#       ######:::::. ###::::::: ##:::: ########::'##:::. ##: ##:::::::::: ##:::: ##:::: ##: ########::
-#       ##...:::::: ## ##:::::: ##:::: ##.. ##::: #########: ##:::::::::: ##:::: ##:::: ##: ##.. ##:::
-#       ##:::::::: ##:. ##::::: ##:::: ##::. ##:: ##.... ##: ##::: ##:::: ##:::: ##:::: ##: ##::. ##::
-#       ########: ##:::. ##:::: ##:::: ##:::. ##: ##:::: ##:. ######::::: ##::::. #######:: ##:::. ##:
-#........::..:::::..:::::..:::::..:::::..::..:::::..:::......::::::..::::::.......:::..:::::..::
+# ██████╗  █████╗ ████████╗ █████╗ 
+# ██╔══██╗██╔══██╗╚══██╔══╝██╔══██╗
+# ██║  ██║███████║   ██║   ███████║
+# ██║  ██║██╔══██║   ██║   ██╔══██║
+# ██████╔╝██║  ██║   ██║   ██║  ██║
+# ╚═════╝ ╚═╝  ╚═╝   ╚═╝   ╚═╝  ╚═╝
 
 import re
 import csv
@@ -23,16 +12,15 @@ from data import userInterface
 import random
 import sys
 import pickle
-
-# globally stores the titles of each data entry from csv
 labels = []
 
-# returns list of all features dicts drawn from the csv
+# fetch csv feature dicts
 def getCSVFeatures():
 	allFeatures = []
 	with open('data/password-data.csv') as file:
 		data = csv.reader(file, delimiter = ',')
 		for row in data:
+
 			# at header: populate labels
 			if row[0] == 'subject':
 				labels = row
@@ -45,6 +33,8 @@ def getCSVFeatures():
 def getRandomCSVFeatures(limit):
 	it = 0
 	allFeatures = []
+
+	# sample limit random features from CSV
 	with open('data/password-data.csv') as file:
 		data = csv.reader(file, delimiter = ',')
 		d = list(data)
@@ -59,17 +49,18 @@ def getRandomCSVFeatures(limit):
 			allFeatures.append(features)
 	return allFeatures
 
-
-
 def getValidCSVFeatures():
 	allFeatures = []
 	validFeatures = []
+
+	# sample CSV features linearly
 	with open('data/password-data.csv') as file:
 		data = csv.reader(file, delimiter = ',')
 		it = 0
 		for row in data:
 			it += 1
 			if it == 2001: break
+
 			# at header: populate labels
 			if row[0] == 'subject':
 				labels = row
@@ -83,7 +74,7 @@ def getValidCSVFeatures():
 				allFeatures.append(features)
 	return validFeatures, allFeatures
 
-# given list of attempts, return list of features normalized by phi
+# fetch normalized features
 def getNormalizedFeatureSet(attemptList, phi):
 	normalized = []
 	for attempt in attemptList:
@@ -97,84 +88,93 @@ def getNormalizedFeatureSet(attemptList, phi):
 		normalized.append(normalizedAttempt)
 	return normalized
 
-# attemptList is a list of defaultdict(int)s, each representing one password
-# attempt for a given user
-# @return phi: a dict from keystroke tuples to average times
+# get phi from attempt for normalization
 def getPhiFromAttemptList(attemptList):
-	# generate list of (prevKey, currKey, event) keystroke tuples, agnostic to time values
+	
+	# generate list of (prevKey, currKey, event) keystroke tuples
 	phi = {}
 	for f in attemptList[0]:
 		keystroke = (f[0], f[1], f[2])
 		phi[keystroke] = 0.0
+
 	# populate phi with total times for all attempts
 	for attempt in attemptList:
 		for f in attempt:
 			keystroke = (f[0], f[1], f[2])
 			phi[keystroke] += attempt[f]
+
 	# normalize phi to get average times
 	for k in phi:
 		phi[k] /= float(len(attemptList))
 
 	return phi
 
-# given list of (keystroke, UP/DOWN, time) events, generate features for password attempt
-# each feature represented by (pastKey, currKey, event) tuple
+# generate features for password attempt
 def getFeaturesFromList(keyList):
 	features = defaultdict(int)
+
 	# add 1-feature
 	features[(None, None, None)] = 1
-
 	prevKey = None
 	prevDownTime, prevUpTime = 0.0, 0.0
 	while keyList != []:
+
 		# take 0-th index entry
 		downEvent = keyList[0]
 		key, event, time = downEvent
-		# if key down event:
 		if event == "DOWN":
+
 			# search for corresponding key up event w/ matching keystroke
 			upEvent = (None, None, None)
 			index = 0
 			while upEvent[0] != key or upEvent[1] != 'UP':
+
 				# temp fix for index out of range bug
 				if index > len(keyList): break
 				upEvent = keyList[index]
 				index += 1
+
 			# compute H, UD, DD times
 			holdTime = upEvent[2] - downEvent[2]
 			upDownTime = downEvent[2] - prevUpTime
 			downDownTime = downEvent[2] - prevDownTime
+
 			# add features based on previous keystroke and previous times
 			features[(None, key, 'H', 'linear')] = max(holdTime, 0)
-			# features[(None, key, 'H', 'squared')] = holdTime**2
 			features[(prevKey, key, 'UD', 'linear')] = max(upDownTime, 0)
-			# features[(prevKey, key, 'UD', 'squared')] = upDownTime**2
 			features[(prevKey, key, 'DD', 'linear')] = max(downDownTime, 0)
-			# features[(prevKey, key, 'DD', 'squared')] = downDownTime**2
+			
 			# update latest key up and key down times, and prev key
 			prevDownTime = downEvent[2]
 			prevUpTime = upEvent[2]
 			prevKey = key
+
 			# remove both key up and key down event from list
 			keyList.remove(downEvent)
 			keyList.remove(upEvent)
 	return features
 
-# returns a list of (keyChar, pressed/released, timeIndex) tuples
+# generate (keyChar, pressed/released, timeIndex) tuples
 def getListFromCSVEntry(row, labels):
+
 	# list to fill with data
 	attempt = []
 	time = 0.0
-	for index in range(3, len(labels)): # 3-offset avoids metadata at beginning
+
+	# 3-offset avoids metadata at beginning
+	for index in range(3, len(labels)):
 		label = labels[index]
 		labelList = label.split(".")
+
 		# time between key press & release held in Hold
 		if labelList[0] == "H":
 			currKey = labelList[1]
 			if currKey == "Return": continue
+
 			# special case for shift key
 			if labelList[1] == "Shift":
 				currKey = "R"
+
 			# special cases for 'period' and 'five'
 			if currKey == "period":
 				currKey = "."
@@ -185,6 +185,7 @@ def getListFromCSVEntry(row, labels):
 			keyRelease = (currKey, "UP", time+holdTime)
 			attempt.append(keyPress)
 			attempt.append(keyRelease)
+
 		# time between key-presses held in Down-Down
 		elif labelList[0] == "DD":
 			time += float(row[index])
@@ -199,6 +200,7 @@ def getListFromCSVEntry(row, labels):
 # @return phi: a vector representing the average times for each keystroke event
 # 	for a user
 ################################################################################
+
 def userFeatureSetsFromInterface():
 	userData = userInterface.welcomeUserAndCollectUserPasswordData(2, 0)
 	features = []
@@ -229,6 +231,7 @@ def getUserDataFeaturesInvalid():
 # @return CSVFeatureSets: a list of dict() objects representing the features
 # 	for password attempts from imposters, generated from the CSV
 ################################################################################
+
 def generateAllFeatureSets(mode):
 
 	if mode == 'demo':
@@ -270,6 +273,7 @@ def generateAllFeatureSets(mode):
 # 	normalizing the requested password's feature set
 # @return attempt: a list containing one password attempt to check against the model
 #####################################################################################
+
 def requestPasswordAttempt(phi):
 	password = userInterface.getOnePassword()
 	passwordFeatures = getFeaturesFromList(password[0])
@@ -282,6 +286,7 @@ def main():
 	# load previous data
 	fileRead = open('user-password-data-{}.txt'.format(sys.argv[1]), 'rb')
 	theResurrection = pickle.load(fileRead)
+	
 	# prompt user and generate raw feature outputs, akin to CSV file
 	userData = userInterface.welcomeUserAndCollectUserPasswordData(10, 0)
 	for datum in userData:

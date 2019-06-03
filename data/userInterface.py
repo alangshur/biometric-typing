@@ -1,14 +1,16 @@
-#                                           ___   ___
-#     //   / /                                / /                                    //  ) )
-#    //   / /  ___      ___      __          / /      __   __  ___  ___      __   __//__  ___      ___      ___
-#   //   / / ((   ) ) //___) ) //  ) )      / /    //   ) ) / /   //___) ) //  ) ) //   //   ) ) //   ) ) //___) )
-#  //   / /   \ \    //       //           / /    //   / / / /   //       //      //   //   / / //       //
-# ((___/ / //   ) ) ((____   //         __/ /___ //   / / / /   ((____   //      //   ((___( ( ((____   ((____
-#
-
-# don't uncomment unless you're Ryan and cannot care for your computer properly
-# import sys
-# sys.path.append('/usr/local/lib/python3.7/site-packages')
+# ██╗   ██╗███████╗███████╗██████╗                                      
+# ██║   ██║██╔════╝██╔════╝██╔══██╗                                     
+# ██║   ██║███████╗█████╗  ██████╔╝                                     
+# ██║   ██║╚════██║██╔══╝  ██╔══██╗                                     
+# ╚██████╔╝███████║███████╗██║  ██║                                     
+#  ╚═════╝ ╚══════╝╚══════╝╚═╝  ╚═╝                                     
+                                                                      
+# ██╗███╗   ██╗████████╗███████╗██████╗ ███████╗ █████╗  ██████╗███████╗
+# ██║████╗  ██║╚══██╔══╝██╔════╝██╔══██╗██╔════╝██╔══██╗██╔════╝██╔════╝
+# ██║██╔██╗ ██║   ██║   █████╗  ██████╔╝█████╗  ███████║██║     █████╗  
+# ██║██║╚██╗██║   ██║   ██╔══╝  ██╔══██╗██╔══╝  ██╔══██║██║     ██╔══╝  
+# ██║██║ ╚████║   ██║   ███████╗██║  ██║██║     ██║  ██║╚██████╗███████╗
+# ╚═╝╚═╝  ╚═══╝   ╚═╝   ╚══════╝╚═╝  ╚═╝╚═╝     ╚═╝  ╚═╝ ╚═════╝╚══════╝
 
 import numpy as np
 from pynput import keyboard
@@ -18,7 +20,7 @@ import time
 import os
 import sys
 
-# global constants (required for weird multithreading that pynput seems to rely upon)
+# global constants (for pynput multithreading)
 rawData = []
 startTime = None
 endTime = None
@@ -27,21 +29,20 @@ numKeyPresses = 0
 counter = 0
 actualPassword = ".tie5Roanl"
 
-#
 # General notes on the below code:
 # Relies heavily on atomicity of Python list operations.  Operations within list
 # indices are not guaranteed to be atomic, but we never modify data here in multiple
 # threads - only add to it.
-#
 
-# Welcome the user to the program
+# welcome!
 def welcomeUser():
     print("Welcome to Alex, Harry and Ryan's CS221 Project.")
     print("We will now gather your biometric data - strap in, you're going to need a few minutes!")
     print("Please enter your password (hint, it's \".tie5Roanl\" - for now!)")
     print("Press enter to submit your password entry.")
 
-# Intercept keyboard events using pynput handler, perform basic error checking and update global data repo
+# intercept keyboard events using pynput handler, perform basic error 
+# checking and update global data repo
 def push_down(key):
     global startTime
     global rawData
@@ -66,7 +67,7 @@ def push_down(key):
         if key == keyboard.Key.shift or key == keyboard.Key.shift_r:
             shiftModifier = True
 
-# Asyncronous logic for when keys are released, with basic error checking
+# asyncronous logic for when keys are released, with basic error checking
 def release(key):
     global startTime
     global rawData
@@ -81,7 +82,7 @@ def release(key):
     except AttributeError:
         pass
 
-# Check if a given 'UP' entry has a corresponding down entry
+# check if a given 'UP' entry has a corresponding down entry
 def entryClosed(index, opener):
     global rawData
     for newIndex in range(index, len(rawData)):
@@ -90,12 +91,13 @@ def entryClosed(index, opener):
             return True
     return False
 
-# Ensure that every up entry is 'closed' - i.e. there is a down event
+# ensure that every up entry is 'closed' - i.e. there is a down event
 def ensureCompleted():
     global endTime
     global startTime
     global rawData
     for index, opener in enumerate(rawData):
+
         # if this is already a closing entry, ignore it
         if opener[1] == "UP": continue
         
@@ -103,7 +105,7 @@ def ensureCompleted():
         if not entryClosed(index, opener):
             rawData.append((opener[0], "UP", endTime - startTime))
 
-# Find a given up entry's corresponding down entry, if it exists
+# find a given up entry's corresponding down entry, if it exists
 def findPrevious(key):
     global rawData
     first = True
@@ -115,7 +117,7 @@ def findPrevious(key):
         if entry[0] == key and entry[1] == "UP": return None
     return None
 
-# Find a given entry's corresponding up/down entry with bounded linear search from a given index
+# find a given entry's corresponding up/down entry with bounded linear search from a given index
 def findPreviousFromIndex(key, index):
     global rawData
     first = True
@@ -127,7 +129,7 @@ def findPreviousFromIndex(key, index):
         index -=1
     return None
 
-# Clear rogue 'up' entries with no down entries from the list (normally happens with weird shift key antics)
+# clear rogue 'up' entries with no down entries from the list (normally happens with weird shift key antics)
 def clearRogueUps():
     global rawData
     if rawData[-1][1] == "UP":
@@ -146,17 +148,15 @@ def clearRogueUps():
                 continue
         index += 1
 
-# Ensure that the password was properly entered
+# ensure that the password was properly entered
 def passwordProperlyEntered():
     global rawData
     global actualPassword
     
     buildString = ""
-
     for entry in rawData:
         if entry[1] == "DOWN":
             buildString += entry[0]
-
     return buildString == actualPassword
 
 ###################################################################
@@ -166,11 +166,11 @@ def passwordProperlyEntered():
 # @return attempt: one password attempt to check against the model
 ###################################################################
 def getOnePassword():
-    return welcomeUserAndCollectUserPasswordData(1, 0)
+    return welcomeUserAndCollectUserPasswordData(1, 0, verbose = False)
 
-# Actual harness function that gathers user password data entry attempts and returns them to the caller
+# actual harness function that gathers user password data entry attempts and returns them to the caller
 # called from data.py
-def welcomeUserAndCollectUserPasswordData(numPasswordsNeeded, numRunupNeeded):
+def welcomeUserAndCollectUserPasswordData(numPasswordsNeeded, numRunupNeeded, verbose = True):
     global rawData
     global endTime
     global startTime
@@ -178,7 +178,7 @@ def welcomeUserAndCollectUserPasswordData(numPasswordsNeeded, numRunupNeeded):
     global numKeyPresses
     global counter
     
-    welcomeUser()
+    if verbose: welcomeUser()
     totalData = []
 
     i = 0
@@ -189,8 +189,6 @@ def welcomeUserAndCollectUserPasswordData(numPasswordsNeeded, numRunupNeeded):
         # ensure that all entries in the data are closed
         ensureCompleted()
         clearRogueUps()
-        print()
-        #print(rawData)
         
         # clear the global variables again
         startTime = None
@@ -198,16 +196,14 @@ def welcomeUserAndCollectUserPasswordData(numPasswordsNeeded, numRunupNeeded):
         shiftModifier = False
         numKeyPresses = 0
         counter = 0
-        
         if passwordProperlyEntered():
             if i >= numRunupNeeded:
                 totalData.append(rawData)
-            print("Fantastic, now enter the password again!  (Trial {} of {}).".format(i + 1, numPasswordsNeeded + numRunupNeeded))
+            if verbose: print("\nFantastic, now enter the password again!  (Trial {} of {}).".format(i + 1, numPasswordsNeeded + numRunupNeeded))
             i += 1
         else:
-            print("Password mis-entered.  Try again:")
+            print("\nPassword mis-entered.  Try again:")
         rawData = []
 
-    print("Great - we've finished gathering training data from you.  Please wait while we process this information")
-    #print(totalData)
+    if verbose: print("Great - we've finished gathering training data from you.  Please wait while we process this information")
     return totalData
