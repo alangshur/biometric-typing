@@ -31,19 +31,19 @@ import random, sys
 mode = sys.argv[1]
 
 # get train data
-validData, invalidData = data.generateAllFeatureSets(mode)
+validData, invalidData, phi = data.generateAllFeatureSets(mode)
 
 # filter data
 filteredDataV, filteredDataIV, ordering = [], [], list(validData[0].keys())
-for data in invalidData:
+for datum in invalidData:
     values = []
-    for key in ordering: values.append(data[key])
+    for key in ordering: values.append(datum[key])
     entry = np.array(values)
     filteredDataIV.append((entry, 0))
-for data in validData:
-    weightSize = len(data)
+for datum in validData:
+    weightSize = len(datum)
     values = []
-    for key in ordering: values.append(data[key])
+    for key in ordering: values.append(datum[key])
     entry = np.array(values)
     filteredDataV.append((entry, 1))
 
@@ -62,3 +62,13 @@ model.trainLR(1000, 0.01, 'adam')
 
 # test data
 model.testLR()
+
+def liveDemo(model, phi):
+	while True:
+		attempt = data.requestPasswordAttempt(phi)
+		model.testDemo(attempt)
+
+# live demo
+if mode == 'demo':
+	liveDemo(model, phi)
+	

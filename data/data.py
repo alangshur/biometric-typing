@@ -260,7 +260,21 @@ def generateAllFeatureSets(mode):
 		CSVFeatures = getCSVFeatures()
 		CSVFeatureSets = getNormalizedFeatureSet(CSVFeatures, phi)
 
-	return userFeatureSets, CSVFeatureSets
+	return userFeatureSets, CSVFeatureSets, phi
+
+#####################################################################################
+# @function: requestPasswordAttempt
+# for the live demo -- gets one password attempt from user input
+#
+# @param phi: a vector representing the authenticated user's average times, for
+# 	normalizing the requested password's feature set
+# @return attempt: a list containing one password attempt to check against the model
+#####################################################################################
+def requestPasswordAttempt(phi):
+	password = userInterface.getOnePassword()
+	passwordFeatures = getFeaturesFromList(password[0])
+	attempt = getNormalizedFeatureSet([passwordFeatures], phi)
+	return attempt
 
 def main():
 	assert sys.argv[1] == 'alex' or sys.argv[1] == 'harry' or sys.argv[1] == 'ryan'

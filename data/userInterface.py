@@ -159,6 +159,15 @@ def passwordProperlyEntered():
 
     return buildString == actualPassword
 
+###################################################################
+# @function: getOnePassword
+# returns a single password attempt from user input
+#
+# @return attempt: one password attempt to check against the model
+###################################################################
+def getOnePassword():
+    return welcomeUserAndCollectUserPasswordData(1, 0)
+
 # Actual harness function that gathers user password data entry attempts and returns them to the caller
 # called from data.py
 def welcomeUserAndCollectUserPasswordData(numPasswordsNeeded, numRunupNeeded):

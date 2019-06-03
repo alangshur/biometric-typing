@@ -61,6 +61,14 @@ class LogisticRegression:
     def trainLR(self, epochs, eta, step):
         self.SGA(epochs, eta, step)
 
+    def testDemo(self, attempt):
+        values = []
+        a = attempt[0]
+        for key in a: values.append(a[key])
+        x = np.array(values)
+        prediction = int(np.dot(self.w, x) > self.d)
+        print("Probability Prediction: {}".format(expit(np.dot(self.w, x))))
+
     def testLR(self, s = 1):
         assert self.trained == True
         totalV, totalIV, corrV, corrIV = 0, 0, 0, 0
