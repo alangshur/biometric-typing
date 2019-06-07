@@ -9,6 +9,4 @@ Designed for execution on Linux/macOS systems.  If macOS, requires macOS SIP to 
 # Models
 - Manhattan NN
 - Euclidean NN
-- Mahalanobis Distribution NN
-- Support-Vector Machine (with polynomial kernel and radial basis)
 - Logistic Regression (with adam-optimized SGD)
