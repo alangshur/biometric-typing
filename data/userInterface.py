@@ -159,12 +159,7 @@ def passwordProperlyEntered():
             buildString += entry[0]
     return buildString == actualPassword
 
-###################################################################
-# @function: getOnePassword
 # returns a single password attempt from user input
-#
-# @return attempt: one password attempt to check against the model
-###################################################################
 def getOnePassword():
     return welcomeUserAndCollectUserPasswordData(1, 0, verbose = False)
 
