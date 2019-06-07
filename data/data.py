@@ -4,6 +4,14 @@
 # ██║  ██║██╔══██║   ██║   ██╔══██║
 # ██████╔╝██║  ██║   ██║   ██║  ██║
 # ╚═════╝ ╚═╝  ╚═╝   ╚═╝   ╚═╝  ╚═╝
+#
+#
+# This file implements a number of important helper functions
+# for gathering data from our users, and for parsing the
+# dataset that we have been using throughout this project
+# (which is stored in CSV form).  These functions are used
+# throughout the rest of our codebase.
+#
 
 import re
 import csv
@@ -14,7 +22,12 @@ import sys
 import pickle
 labels = []
 
-# fetch csv feature dicts
+#####################################################################################
+# @function: getNormalizedFeatureSet
+# fetch feature dicts from a CSV file at a known location
+#
+# @return allFeatures: a list of all feature dicts from the CSV
+#####################################################################################
 def getCSVFeatures():
 	allFeatures = []
 	with open('data/password-data.csv') as file:
@@ -29,6 +42,15 @@ def getCSVFeatures():
 				features = getFeaturesFromList(keyList)
 				allFeatures.append(features)
 	return allFeatures
+
+#####################################################################################
+# @function: getRandomCSVFeatures
+# helper function that randomly samples the CSV, not including
+# the first user (who we deem to be our 'real' user
+#
+# @param limit: the limit on the number of random features we want
+# @return allFeatures: all the features extracted
+#####################################################################################
 
 def getRandomCSVFeatures(limit):
 	it = 0
@@ -48,6 +70,15 @@ def getRandomCSVFeatures(limit):
 			features = getFeaturesFromList(keyList)
 			allFeatures.append(features)
 	return allFeatures
+
+#####################################################################################
+# @function: getRandomCSVFeatures
+# helper function that returns the features dicts for the
+# real user
+#
+# @param limit: the limit on the number of random features we want
+# @return allFeatures: all the features extracted
+#####################################################################################
 
 def getValidCSVFeatures():
 	allFeatures = []
@@ -74,7 +105,17 @@ def getValidCSVFeatures():
 				allFeatures.append(features)
 	return validFeatures, allFeatures
 
-# fetch normalized features
+#####################################################################################
+# @function: getNormalizedFeatureSet
+# helper function to normalise the features that we extract
+# around the 'real users' mean feature vector, so we can
+# define an origin-centric hyperellipsoidal decision boundary later
+#
+# @param attemptList: the list to extract into features
+# @param phi: phi, as the mean of valid user vectors
+# @return normalized: the normalised linear feature vector
+#####################################################################################
+
 def getNormalizedFeatureSet(attemptList, phi):
 	normalized = []
 	for attempt in attemptList:
@@ -88,7 +129,14 @@ def getNormalizedFeatureSet(attemptList, phi):
 		normalized.append(normalizedAttempt)
 	return normalized
 
-# get phi from attempt for normalization
+#####################################################################################
+# @function: getPhiFromAttemptList
+# return phi from an attempt for normalisation purposes
+#
+# @param attemptList: the list to extract into features
+# @return phi: phi, as a dictionary
+#####################################################################################
+
 def getPhiFromAttemptList(attemptList):
 	
 	# generate list of (prevKey, currKey, event) keystroke tuples
@@ -109,7 +157,14 @@ def getPhiFromAttemptList(attemptList):
 
 	return phi
 
-# generate features for password attempt
+#####################################################################################
+# @function: getListFromCSVEntry
+# generate features from a hyperparameter template and a list
+#
+# @param keyList: the list to extract into features
+# @return features: the dict of features
+#####################################################################################
+
 def getFeaturesFromList(keyList):
 	features = defaultdict(int)
 
@@ -154,7 +209,15 @@ def getFeaturesFromList(keyList):
 			keyList.remove(upEvent)
 	return features
 
-# generate (keyChar, pressed/released, timeIndex) tuples
+#####################################################################################
+# @function: getListFromCSVEntry
+# generate relevant tuples for later lifting into feature vectors from CSV data, of
+# the form: (keyChar, pressed/released, timeIndex)
+#
+# @param row: the row to extract
+# @return attempt: a list of appropriate labels for the tuples
+#####################################################################################
+
 def getListFromCSVEntry(row, labels):
 
 	# list to fill with data
@@ -210,10 +273,26 @@ def userFeatureSetsFromInterface():
 	normalizedFeatures = getNormalizedFeatureSet(features, phi)
 	return normalizedFeatures, phi
 
+################################################################################
+# @function: getUserDataFeaturesValid
+# get valid user serialised data, and load it into memory
+#
+# @return normalizedFeatures: a list of features, normalized by
+#     their distance from the average time, for the valid user
+################################################################################
+
 def getUserDataFeaturesValid():
 	fileRead = open('data/user-password-data-harry.txt', 'rb')
 	userDataFeatures = pickle.load(fileRead)
 	return userDataFeatures
+
+################################################################################
+# @function: getUserDataFeaturesInvalid
+# get valid user serialised data, and load it into memory
+#
+# @return normalizedFeatures: a list of features, normalized by
+#     their distance from the average time, for the invalid user
+################################################################################
 
 def getUserDataFeaturesInvalid():
 	# fileRead1 = open('data/user-password-data-alex.txt', 'rb')
